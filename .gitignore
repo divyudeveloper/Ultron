@@ -1,0 +1,43 @@
+node_modules/
+.env
+.env.*
+!.env.example
+logs/
+*.log
+
+# Old backup versions
+backend/services/*backup*
+backend/services/*before-*
+backend/services/*broken*
+backend/services/*corrupt*
+backend/services/*corrupted*
+backend/services/*checkpoint*
+backend/services/*performance*
+backend/services/*speed-optimized*
+backend/services/*.txt
+
+# Local data
+backend/data/*.json
+
+# Test / benchmark files
+*-test.*
+test-*.*
+ollama-*.mjs
+llama-*.mjs
+
+# Temporary
+-replace
+
+# Any old/backup versions anywhere
+**/*backup*
+**/*.backup*
+**/*before-*
+**/*broken*
+**/*corrupt*
+**/*corrupted*
+**/*checkpoint*
+**/*performance*
+**/*speed-optimized*
+**/*.txt
+
+.ultron.pid

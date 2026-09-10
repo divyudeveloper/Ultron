@@ -1,0 +1,3488 @@
+﻿/* =========================================================
+   ULTRON AI â€” NEURAL HUD
+   VISUAL ENGINE v3.0
+   Compatible with existing ULTRON HTML / JS
+========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+
+/* =========================================================
+   ROOT
+========================================================= */
+
+:root {
+    --bg: #020304;
+    --bg-2: #050709;
+
+    --panel: rgba(7, 10, 13, .82);
+    --panel-2: rgba(11, 14, 18, .72);
+
+    --red: #ff1605;
+    --red-2: #ff3b1f;
+    --orange: #ff7a00;
+    --amber: #ffb52e;
+
+    --cyan: #00d9ff;
+    --green: #00ff91;
+
+    --white: #f4f7f8;
+    --text: #c8ced3;
+    --muted: #737c84;
+    --dim: #3b4249;
+
+    --line: rgba(255, 55, 20, .18);
+    --line-bright: rgba(255, 65, 25, .45);
+
+    --glow-red:
+        0 0 8px rgba(255, 35, 10, .75),
+        0 0 25px rgba(255, 35, 10, .25);
+
+    --glow-orange:
+        0 0 8px rgba(255, 125, 0, .65),
+        0 0 24px rgba(255, 100, 0, .18);
+
+    --radius: 14px;
+
+    --display: "Orbitron", sans-serif;
+    --ui: "Rajdhani", sans-serif;
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+html {
+    min-height: 100%;
+    background: var(--bg);
+    scroll-behavior: smooth;
+}
+
+
+body {
+    min-height: 100vh;
+
+    color: var(--text);
+
+    font-family: var(--ui);
+
+    background:
+        radial-gradient(
+            circle at 50% 35%,
+            rgba(255, 35, 5, .085),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 15% 80%,
+            rgba(255, 110, 0, .035),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 90% 10%,
+            rgba(0, 160, 255, .025),
+            transparent 25%
+        ),
+        linear-gradient(
+            135deg,
+            #010203,
+            #050709 50%,
+            #020304
+        );
+
+    overflow-x: hidden;
+}
+
+
+/* =========================================================
+   GLOBAL HUD GRID
+========================================================= */
+
+body::before {
+    content: "";
+
+    position: fixed;
+    inset: 0;
+
+    pointer-events: none;
+
+    background-image:
+        linear-gradient(
+            rgba(255,255,255,.018) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.018) 1px,
+            transparent 1px
+        );
+
+    background-size: 42px 42px;
+
+    mask-image:
+        radial-gradient(
+            ellipse at center,
+            black 20%,
+            transparent 90%
+        );
+
+    opacity: .55;
+
+    z-index: -3;
+}
+
+
+/* =========================================================
+   SCANLINES
+========================================================= */
+
+body::after {
+    content: "";
+
+    position: fixed;
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0,
+            transparent 3px,
+            rgba(255,255,255,.012) 4px
+        );
+
+    opacity: .45;
+
+    z-index: 9999;
+}
+
+
+/* =========================================================
+   APP
+========================================================= */
+
+.app {
+    position: relative;
+
+    width: min(1800px, 96%);
+
+    min-height: 100vh;
+
+    margin: auto;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.top-bar {
+    height: 74px;
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 28px;
+
+    border-bottom: 1px solid var(--line);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.018),
+            transparent
+        );
+
+    backdrop-filter: blur(12px);
+}
+
+
+.top-bar::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    bottom: -1px;
+
+    width: 260px;
+    height: 2px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--red),
+            var(--orange),
+            transparent
+        );
+
+    box-shadow:
+        0 0 12px var(--red),
+        0 0 30px rgba(255,50,10,.3);
+}
+
+
+.top-bar::after {
+    content: "";
+
+    position: absolute;
+
+    right: 0;
+    bottom: -1px;
+
+    width: 100px;
+    height: 1px;
+
+    background: var(--orange);
+
+    opacity: .45;
+}
+
+
+/* =========================================================
+   BRAND
+========================================================= */
+
+.brand {
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    font-family: var(--display);
+
+    font-size: 22px;
+
+    font-weight: 800;
+
+    letter-spacing: 5px;
+
+    color: var(--white);
+
+    text-shadow:
+        0 0 12px rgba(255,40,10,.65),
+        0 0 35px rgba(255,30,5,.18);
+}
+
+
+.brand-dot {
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    background: var(--red);
+
+    box-shadow:
+        0 0 8px var(--red),
+        0 0 22px var(--red),
+        0 0 40px rgba(255,30,5,.45);
+
+    animation: statusPulse 1.5s infinite;
+}
+
+
+/* =========================================================
+   SYSTEM STATE
+========================================================= */
+
+.system-state {
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    font-family: var(--display);
+
+    font-size: 10px;
+
+    letter-spacing: 2px;
+
+    color: var(--muted);
+}
+
+
+#indicator {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: var(--orange);
+
+    box-shadow:
+        0 0 8px var(--orange),
+        0 0 20px rgba(255,120,0,.45);
+
+    animation: statusPulse 1.4s infinite;
+}
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+.dashboard {
+    flex: 1;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(420px, 1.25fr)
+        minmax(330px, .75fr);
+
+    grid-template-rows:
+        auto auto;
+
+    gap: 18px;
+
+    padding: 22px 0;
+}
+
+
+/* =========================================================
+   PANEL SYSTEM
+========================================================= */
+
+.core-panel,
+.side-panel,
+.command-panel {
+    position: relative;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.028),
+            transparent 30%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(255,20,5,.018),
+            transparent 40%
+        ),
+        var(--panel);
+
+    border: 1px solid var(--line);
+
+    box-shadow:
+        inset 0 0 50px rgba(255,20,0,.018),
+        0 15px 50px rgba(0,0,0,.45);
+
+    backdrop-filter: blur(15px);
+
+    overflow: hidden;
+}
+
+
+.core-panel::before,
+.side-panel::before,
+.command-panel::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+
+    border-top: 1px solid rgba(255,120,40,.08);
+    border-left: 1px solid rgba(255,120,40,.05);
+
+    z-index: 1;
+}
+
+
+/* =========================================================
+   TACTICAL CORNERS
+========================================================= */
+
+.core-panel::after,
+.command-panel::after {
+    content: "";
+
+    position: absolute;
+
+    width: 45px;
+    height: 45px;
+
+    top: 0;
+    right: 0;
+
+    border-top: 1px solid var(--red);
+    border-right: 1px solid var(--red);
+
+    opacity: .55;
+
+    pointer-events: none;
+
+    box-shadow:
+        0 0 14px rgba(255,30,5,.2);
+}
+
+
+/* =========================================================
+   CORE PANEL
+========================================================= */
+
+.core-panel {
+    min-height: 580px;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: var(--radius);
+
+    isolation: isolate;
+}
+
+
+.core-panel > * {
+    position: relative;
+    z-index: 2;
+}
+
+
+.core-panel::before {
+    background:
+        linear-gradient(
+            90deg,
+            transparent 48%,
+            rgba(255,50,10,.018) 50%,
+            transparent 52%
+        );
+}
+
+
+/* =========================================================
+   CORE AMBIENT GLOW
+========================================================= */
+
+.core-panel .core::before {
+    content: "";
+
+    position: absolute;
+
+    width: 440px;
+    height: 440px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,35,5,.13),
+            rgba(255,35,5,.035) 35%,
+            transparent 70%
+        );
+
+    filter: blur(5px);
+
+    animation: reactorGlow 3s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   CORE STATUS
+========================================================= */
+
+.core-status-line {
+    position: absolute;
+
+    top: 24px;
+    left: 28px;
+    right: 28px;
+
+    display: flex;
+    justify-content: space-between;
+
+    font-family: var(--display);
+
+    font-size: 9px;
+
+    letter-spacing: 3px;
+
+    color: var(--muted);
+}
+
+
+
+
+
+.core-status-line span:last-child {
+    color: var(--green);
+
+    text-shadow:
+        0 0 10px rgba(0,255,136,.7);
+}
+
+
+/* =========================================================
+   REACTOR
+========================================================= */
+
+.core {
+    position: relative;
+
+    width: 340px;
+    height: 340px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 26px;
+
+    perspective: 700px;
+}
+
+
+/* =========================================================
+   REACTOR ENERGY RINGS
+========================================================= */
+
+.core-ring {
+    position: absolute;
+
+    border-radius: 50%;
+
+    transform-origin: center;
+
+    will-change: transform;
+
+    mix-blend-mode: screen;
+}
+
+
+.ring-one {
+    width: 300px;
+    height: 300px;
+
+    border: 1px dashed rgba(255,55,15,.55);
+
+    border-top-color: var(--red);
+    border-right-color: transparent;
+    border-bottom-color: rgba(255,120,0,.3);
+
+    box-shadow:
+        0 0 12px rgba(255,30,5,.12);
+
+    animation:
+        rotateClockwise 16s linear infinite;
+}
+
+
+.ring-two {
+    width: 255px;
+    height: 255px;
+
+    border: 1px solid rgba(255,110,30,.4);
+
+    border-top-color: transparent;
+    border-right-color: var(--orange);
+    border-bottom-color: transparent;
+    border-left-color: rgba(255,40,5,.5);
+
+    animation:
+        rotateReverse 9s linear infinite;
+}
+
+
+.ring-three {
+    width: 205px;
+    height: 205px;
+
+    border: 2px dotted rgba(255,70,20,.45);
+
+    border-top-color: var(--amber);
+    border-bottom-color: transparent;
+
+    animation:
+        rotateClockwise 6s linear infinite;
+}
+
+
+/* =========================================================
+   EXTRA ORBIT EFFECT
+========================================================= */
+
+.core::after {
+    content: "";
+
+    position: absolute;
+
+    width: 315px;
+    height: 120px;
+
+    border: 1px solid rgba(255,80,20,.18);
+
+    border-radius: 50%;
+
+    transform: rotate(-28deg);
+
+    box-shadow:
+        0 0 20px rgba(255,30,5,.08);
+
+    animation: orbitTilt 8s linear infinite;
+}
+
+
+/* =========================================================
+   CORE SCAN
+========================================================= */
+
+.core-scan {
+    position: absolute;
+
+    width: 190px;
+    height: 190px;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(255,60,20,.45);
+
+    overflow: hidden;
+
+    box-shadow:
+        inset 0 0 25px rgba(255,30,5,.12);
+}
+
+
+.core-scan::before {
+    content: "";
+
+    position: absolute;
+    inset: 14px;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(255,100,30,.16);
+
+    animation:
+        rotateReverse 7s linear infinite;
+}
+
+
+.core-scan::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+
+    height: 45%;
+
+    background:
+        linear-gradient(
+            to bottom,
+            transparent,
+            rgba(255,70,20,.28),
+            transparent
+        );
+
+    filter: blur(2px);
+
+    animation: scan 2.2s linear infinite;
+}
+
+
+/* =========================================================
+   CORE CENTER
+========================================================= */
+
+.core-center {
+    position: relative;
+
+    width: 128px;
+    height: 128px;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background:
+        radial-gradient(
+            circle,
+            #240702 0%,
+            #100302 52%,
+            #030303 100%
+        );
+
+    border: 2px solid rgba(255,70,25,.8);
+
+    box-shadow:
+        0 0 18px rgba(255,35,5,.45),
+        0 0 55px rgba(255,30,0,.16),
+        inset 0 0 35px rgba(255,30,5,.32);
+
+    z-index: 5;
+
+    animation: coreBreath 2.3s ease-in-out infinite;
+}
+
+
+.core-center::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 9px;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(255,155,60,.42);
+
+    box-shadow:
+        inset 0 0 15px rgba(255,50,10,.18);
+}
+
+
+.core-center::after {
+    content: "";
+
+    position: absolute;
+
+    inset: 18px;
+
+    border-radius: 50%;
+
+    border: 1px dashed rgba(255,70,20,.3);
+
+    animation:
+        rotateClockwise 5s linear infinite;
+}
+
+
+.core-center span {
+    position: relative;
+
+    z-index: 2;
+
+    font-family: var(--display);
+
+    font-size: 50px;
+
+    font-weight: 900;
+
+    color: #fff;
+
+    text-shadow:
+        0 0 8px var(--red),
+        0 0 20px var(--red),
+        0 0 40px rgba(255,30,5,.45);
+
+    animation: textFlicker 4s infinite;
+}
+
+
+/* =========================================================
+   CORE TITLE
+========================================================= */
+
+.core-panel h1 {
+    font-family: var(--display);
+
+    font-size: clamp(32px, 4vw, 50px);
+
+    letter-spacing: 11px;
+
+    font-weight: 900;
+
+    color: white;
+
+    text-shadow:
+        0 0 10px rgba(255,45,10,.7),
+        0 0 30px rgba(255,30,5,.25);
+}
+
+
+#status {
+    margin-top: 9px;
+
+    font-family: var(--display);
+
+    font-size: 10px;
+
+    letter-spacing: 3px;
+
+    color: var(--orange);
+
+    text-shadow:
+        0 0 10px rgba(255,100,0,.35);
+}
+
+
+/* =========================================================
+   AUDIO WAVE
+========================================================= */
+
+.wave {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 4px;
+
+    height: 35px;
+
+    margin-top: 18px;
+}
+
+
+.wave span {
+    width: 3px;
+
+    height: 7px;
+
+    background:
+        linear-gradient(
+            to top,
+            var(--red),
+            var(--orange)
+        );
+
+    box-shadow:
+        0 0 8px var(--red);
+
+    animation:
+        waveAnimation .85s ease-in-out infinite alternate;
+}
+
+
+/* =========================================================
+   SIDE PANEL
+========================================================= */
+
+.side-panel {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+
+    padding: 14px;
+
+    border-radius: var(--radius);
+
+    max-height: 100%;
+
+    overflow-y: auto;
+
+    scrollbar-width: thin;
+
+    scrollbar-color:
+        rgba(255,50,20,.5)
+        transparent;
+}
+
+
+/* =========================================================
+   PANEL CARDS
+========================================================= */
+
+.panel-card {
+    position: relative;
+
+    padding: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.025),
+            rgba(255,20,0,.02)
+        );
+
+    border: 1px solid rgba(255,50,20,.16);
+
+    border-radius: 11px;
+
+    overflow: hidden;
+
+    transition:
+        transform .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease,
+        background .25s ease;
+}
+
+
+.panel-card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -100%;
+
+    width: 80%;
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            var(--red),
+            transparent
+        );
+
+    opacity: .6;
+
+    transition: left .7s ease;
+}
+
+
+.panel-card:hover::before {
+    left: 120%;
+}
+
+
+.panel-card:hover {
+    transform: translateY(-2px);
+
+    border-color:
+        rgba(255,70,25,.45);
+
+    background:
+        rgba(255,30,10,.035);
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.25),
+        0 0 20px rgba(255,30,5,.04);
+}
+
+
+/* =========================================================
+   PANEL TITLE
+========================================================= */
+
+.panel-title {
+    display: flex;
+
+    justify-content: space-between;
+
+    color: var(--muted);
+
+    font-family: var(--display);
+
+    font-size: 9px;
+
+    letter-spacing: 2px;
+
+    margin-bottom: 12px;
+}
+
+
+.panel-title span:last-child {
+    color: var(--red);
+
+    opacity: .8;
+
+    text-shadow:
+        0 0 8px rgba(255,30,5,.45);
+}
+
+
+/* =========================================================
+   PANEL VALUE
+========================================================= */
+
+.panel-value {
+    font-family: var(--display);
+
+    color: var(--orange);
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    margin-bottom: 14px;
+
+    text-shadow:
+        0 0 10px rgba(255,100,0,.4);
+}
+
+
+/* =========================================================
+   SYSTEM GRID
+========================================================= */
+
+.system-monitor-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 8px;
+
+    margin-bottom: 12px;
+}
+
+
+/* =========================================================
+   SYSTEM STAT
+========================================================= */
+
+.system-stat {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 8px 0;
+
+    border-bottom:
+        1px solid rgba(255,255,255,.045);
+}
+
+
+.system-stat span {
+    font-family: var(--display);
+
+    font-size: 8px;
+
+    letter-spacing: 1.5px;
+
+    color: var(--dim);
+}
+
+
+.system-stat strong {
+    max-width: 70%;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+    color: #dce1e5;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    text-align: right;
+}
+
+
+/* =========================================================
+   GAUGES
+========================================================= */
+
+.monitor-gauge {
+    margin-top: 13px;
+}
+
+
+.gauge-label {
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-bottom: 6px;
+
+    font-family: var(--display);
+
+    font-size: 8px;
+
+    letter-spacing: 1.5px;
+
+    color: var(--muted);
+}
+
+
+.gauge-label span:last-child {
+    color: var(--orange);
+
+    text-shadow:
+        0 0 8px rgba(255,100,0,.35);
+}
+
+
+.gauge-track {
+    position: relative;
+
+    width: 100%;
+
+    height: 6px;
+
+    background:
+        rgba(255,255,255,.045);
+
+    overflow: hidden;
+}
+
+
+.gauge-track::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        repeating-linear-gradient(
+            90deg,
+            transparent 0,
+            transparent 8px,
+            rgba(255,255,255,.05) 9px
+        );
+}
+
+
+.gauge-fill {
+    position: relative;
+
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--red),
+            var(--orange),
+            var(--amber)
+        );
+
+    box-shadow:
+        0 0 10px rgba(255,60,10,.7),
+        0 0 22px rgba(255,60,10,.18);
+
+    transition:
+        width .6s cubic-bezier(.2,.8,.2,1);
+}
+
+
+.gauge-fill::after {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    right: 0;
+
+    width: 35px;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.8)
+        );
+
+    filter: blur(2px);
+
+    animation:
+        gaugeShine 1.8s linear infinite;
+}
+
+
+/* =========================================================
+   PANEL LINE
+========================================================= */
+
+.panel-line {
+    width: 100%;
+
+    height: 1px;
+
+    margin-top: 14px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--red),
+            rgba(255,100,0,.2),
+            transparent
+        );
+
+    opacity: .45;
+}
+
+
+/* =========================================================
+   MEMORY
+========================================================= */
+
+.memory-panel {
+    max-height: 230px;
+
+    overflow-y: auto;
+}
+
+
+#memoryList {
+    max-height: 160px;
+
+    overflow-y: auto;
+
+    color: var(--muted);
+
+    font-size: 12px;
+}
+
+
+.memory-entry {
+    padding: 10px;
+
+    margin-bottom: 7px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,40,10,.05),
+            rgba(255,255,255,.018)
+        );
+
+    border-left:
+        2px solid var(--red);
+
+    animation:
+        memoryAppear .3s ease;
+}
+
+
+.memory-type {
+    color: var(--orange);
+
+    font-family: var(--display);
+
+    font-size: 8px;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 3px;
+}
+
+
+.memory-content {
+    color: #bbb;
+
+    font-size: 12px;
+
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   MEMORY SAVE
+========================================================= */
+
+.memory-save-panel {
+    padding: 16px;
+
+    border:
+        1px solid rgba(255,50,20,.16);
+
+    border-radius: 11px;
+
+    background:
+        rgba(5,6,8,.8);
+}
+
+
+.history-title {
+    color: var(--muted);
+
+    font-family: var(--display);
+
+    font-size: 9px;
+
+    letter-spacing: 2px;
+
+    margin-bottom: 10px;
+}
+
+
+.memory-input-area {
+    display: grid;
+
+    grid-template-columns:
+        .6fr 1.4fr auto;
+
+    gap: 7px;
+}
+
+
+/* =========================================================
+   INPUTS
+========================================================= */
+
+input {
+    width: 100%;
+
+    border: 1px solid rgba(255,50,20,.18);
+
+    background:
+        rgba(0,0,0,.58);
+
+    color: white;
+
+    outline: none;
+
+    padding: 11px 13px;
+
+    border-radius: 7px;
+
+    font-family: var(--ui);
+
+    font-size: 13px;
+
+    transition:
+        border-color .25s ease,
+        box-shadow .25s ease,
+        background .25s ease;
+}
+
+
+input::placeholder {
+    color: #454c52;
+}
+
+
+input:hover {
+    border-color:
+        rgba(255,60,20,.35);
+}
+
+
+input:focus {
+    border-color:
+        rgba(255,70,25,.75);
+
+    background:
+        rgba(255,30,10,.025);
+
+    box-shadow:
+        0 0 0 2px rgba(255,40,10,.05),
+        0 0 18px rgba(255,40,10,.1),
+        inset 0 0 15px rgba(255,30,5,.025);
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+button {
+    position: relative;
+
+    border:
+        1px solid rgba(255,60,20,.32);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,40,10,.13),
+            rgba(255,120,0,.055)
+        );
+
+    color: #eee;
+
+    padding: 10px 14px;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    overflow: hidden;
+
+    font-family: var(--display);
+
+    font-size: 9px;
+
+    letter-spacing: 1px;
+
+    transition:
+        transform .16s ease,
+        border-color .22s ease,
+        background .22s ease,
+        box-shadow .22s ease;
+}
+
+
+button::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -120%;
+
+    width: 80%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.15),
+            transparent
+        );
+
+    transform: skewX(-20deg);
+
+    transition: left .45s ease;
+}
+
+
+button:hover::before {
+    left: 140%;
+}
+
+
+button:hover {
+    border-color:
+        rgba(255,80,30,.75);
+
+    background:
+        rgba(255,50,15,.15);
+
+    box-shadow:
+        0 0 15px rgba(255,50,15,.17),
+        inset 0 0 12px rgba(255,50,15,.05);
+
+    transform: translateY(-1px);
+}
+
+
+button:active {
+    transform:
+        translateY(1px)
+        scale(.98);
+}
+
+
+/* =========================================================
+   COMMAND PANEL
+========================================================= */
+
+.command-panel {
+    grid-column: 1 / -1;
+
+    padding: 20px;
+
+    border-radius: var(--radius);
+
+    min-height: 620px;
+}
+
+
+/* =========================================================
+   COMMAND HEADER
+========================================================= */
+
+.command-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding-bottom: 15px;
+
+    border-bottom:
+        1px solid rgba(255,50,20,.14);
+}
+
+
+.command-header > div:first-child {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+.command-header > div:first-child > span:first-child {
+    font-family: var(--display);
+
+    font-size: 13px;
+
+    letter-spacing: 2px;
+
+    color: #eee;
+}
+
+
+.command-subtitle,
+.chat-subtitle {
+    color: var(--dim);
+
+    font-family: var(--display);
+
+    font-size: 8px;
+
+    letter-spacing: 2px;
+}
+
+
+.terminal-status {
+    color: var(--green);
+
+    font-family: var(--display);
+
+    font-size: 9px;
+
+    letter-spacing: 2px;
+
+    text-shadow:
+        0 0 10px rgba(0,255,136,.4);
+
+    animation:
+        statusPulse 2s infinite;
+}
+
+
+/* =========================================================
+   COMMAND INPUT
+========================================================= */
+
+.command-input-area {
+    display: grid;
+
+    grid-template-columns:
+        1fr auto auto auto;
+
+    gap: 8px;
+
+    margin-top: 16px;
+}
+
+
+.command-input-area input {
+    min-height: 44px;
+}
+
+
+.command-input-area button {
+    min-width: 85px;
+}
+
+
+/* =========================================================
+   COMMAND OUTPUT
+========================================================= */
+
+#commandOutput {
+    position: relative;
+
+    min-height: 80px;
+
+    margin-top: 12px;
+
+    padding: 16px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,20,5,.025),
+            rgba(0,0,0,.42)
+        );
+
+    border:
+        1px solid rgba(255,50,20,.12);
+
+    border-left:
+        2px solid var(--red);
+
+    color: #bfc4c8;
+
+    font-family: "Courier New", monospace;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+
+    white-space: pre-wrap;
+
+    overflow-wrap: anywhere;
+
+    box-shadow:
+        inset 0 0 25px rgba(255,30,5,.02);
+}
+
+
+/* =========================================================
+   COMMAND HISTORY
+========================================================= */
+
+.command-history {
+    margin-top: 15px;
+
+    padding: 15px;
+
+    background:
+        rgba(0,0,0,.25);
+
+    border:
+        1px solid rgba(255,50,20,.1);
+}
+
+
+.history-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 10px;
+}
+
+
+#historyList {
+    max-height: 170px;
+
+    overflow-y: auto;
+}
+
+
+.history-entry {
+    padding: 9px 11px;
+
+    margin-bottom: 6px;
+
+    border-left:
+        2px solid var(--orange);
+
+    background:
+        rgba(255,255,255,.018);
+
+    animation:
+        memoryAppear .25s ease;
+}
+
+
+.history-command {
+    color: var(--orange);
+
+    font-family: "Courier New", monospace;
+
+    font-size: 11px;
+}
+
+
+.history-response {
+    margin-top: 4px;
+
+    color: #858b91;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   AI CHAT
+========================================================= */
+
+.ai-chat-panel {
+    position: relative;
+
+    margin-top: 15px;
+
+    border:
+        1px solid rgba(255,50,20,.18);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,30,10,.035),
+            rgba(0,0,0,.38)
+        );
+
+    overflow: hidden;
+}
+
+
+.ai-chat-panel::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -100%;
+
+    width: 60%;
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            var(--orange),
+            transparent
+        );
+
+    animation:
+        hudSweep 4s linear infinite;
+}
+
+
+/* =========================================================
+   CHAT HEADER
+========================================================= */
+
+.chat-header {
+    min-height: 55px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 17px;
+
+    border-bottom:
+        1px solid rgba(255,50,20,.13);
+}
+
+
+.chat-header > div:first-child {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+.chat-header > div:first-child > span:first-child {
+    font-family: var(--display);
+
+    font-size: 13px;
+
+    letter-spacing: 2px;
+
+    color: white;
+}
+
+
+.chat-core-status {
+    font-family: var(--display);
+
+    font-size: 8px;
+
+    letter-spacing: 2px;
+
+    color: var(--red);
+
+    text-shadow:
+        0 0 8px rgba(255,30,5,.45);
+}
+
+
+/* =========================================================
+   CHAT MESSAGES
+========================================================= */
+
+.chat-messages {
+    height: 330px;
+
+    overflow-y: auto;
+
+    padding: 15px;
+
+    background:
+        radial-gradient(
+            circle at 50% 50%,
+            rgba(255,30,5,.025),
+            transparent 55%
+        ),
+        rgba(0,0,0,.25);
+}
+
+
+.chat-message {
+    position: relative;
+
+    max-width: 85%;
+
+    margin-bottom: 11px;
+
+    padding: 11px 13px;
+
+    border:
+        1px solid rgba(255,255,255,.06);
+
+    animation:
+        chatAppear .25s ease;
+}
+
+
+.user-message {
+    margin-left: auto;
+
+    background:
+        rgba(255,40,10,.055);
+
+    border-right:
+        2px solid var(--red);
+
+    box-shadow:
+        8px 0 25px rgba(255,30,5,.025);
+}
+
+
+.ai-message {
+    background:
+        rgba(255,140,0,.035);
+
+    border-left:
+        2px solid var(--orange);
+}
+
+
+.system-message {
+    background:
+        rgba(255,255,255,.02);
+
+    border-left:
+        2px solid var(--dim);
+}
+
+
+.chat-sender {
+    font-family: var(--display);
+
+    font-size: 8px;
+
+    letter-spacing: 2px;
+
+    color: var(--red);
+
+    margin-bottom: 5px;
+}
+
+
+.ai-message .chat-sender {
+    color: var(--orange);
+}
+
+
+.system-message .chat-sender {
+    color: var(--muted);
+}
+
+
+.chat-text {
+    color: #c8cdd1;
+
+    font-size: 13px;
+
+    line-height: 1.55;
+
+    white-space: pre-wrap;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   CHAT INPUT
+========================================================= */
+
+.chat-input-area {
+    display: grid;
+
+    grid-template-columns:
+        1fr auto;
+
+    gap: 8px;
+
+    padding: 12px;
+
+    border-top:
+        1px solid rgba(255,50,20,.1);
+}
+
+
+.chat-input-area button {
+    min-width: 90px;
+}
+
+
+#chatStatus {
+    padding:
+        0 13px 12px;
+
+    color: var(--muted);
+
+    font-family: var(--display);
+
+    font-size: 8px;
+
+    letter-spacing: 1.5px;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.bottom-bar {
+    min-height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 20px;
+
+    border-top:
+        1px solid rgba(255,50,20,.14);
+
+    color: var(--dim);
+
+    font-family: var(--display);
+
+    font-size: 8px;
+
+    letter-spacing: 2px;
+}
+
+
+.bottom-bar span:first-child {
+    color: rgba(255,70,25,.6);
+}
+
+
+/* =========================================================
+   CORE STATES
+========================================================= */
+
+.core-idle .core-center {
+    animation:
+        coreBreath 2.4s ease-in-out infinite;
+}
+
+
+.core-listening .core-center {
+    border-color: var(--cyan);
+
+    box-shadow:
+        0 0 25px rgba(0,217,255,.55),
+        0 0 60px rgba(0,217,255,.15),
+        inset 0 0 30px rgba(0,217,255,.2);
+}
+
+
+.core-listening .core-ring {
+    border-color:
+        rgba(0,217,255,.45);
+}
+
+
+.core-processing .ring-one {
+    animation-duration: 5s;
+}
+
+
+.core-processing .ring-two {
+    animation-duration: 3s;
+}
+
+
+.core-processing .core-center {
+    box-shadow:
+        0 0 35px rgba(255,60,0,.7),
+        0 0 75px rgba(255,40,0,.18),
+        inset 0 0 35px rgba(255,50,0,.3);
+}
+
+
+.core-speaking .core-center {
+    animation:
+        speakingPulse .55s ease-in-out infinite alternate;
+}
+
+
+/* =========================================================
+   SCROLLBARS
+========================================================= */
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+::-webkit-scrollbar-thumb {
+    background:
+        linear-gradient(
+            180deg,
+            var(--red),
+            var(--orange)
+        );
+
+    border-radius: 10px;
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--orange);
+}
+
+
+/* =========================================================
+   SELECTION
+========================================================= */
+
+::selection {
+    background:
+        rgba(255,50,15,.4);
+
+    color: white;
+}
+
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes rotateClockwise {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+@keyframes rotateReverse {
+    from {
+        transform: rotate(360deg);
+    }
+
+    to {
+        transform: rotate(0deg);
+    }
+}
+
+
+@keyframes orbitTilt {
+    from {
+        transform:
+            rotate(-28deg)
+            rotateZ(0deg);
+    }
+
+    to {
+        transform:
+            rotate(-28deg)
+            rotateZ(360deg);
+    }
+}
+
+
+@keyframes scan {
+    from {
+        transform: translateY(-120%);
+    }
+
+    to {
+        transform: translateY(220%);
+    }
+}
+
+
+@keyframes coreBreath {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.035);
+    }
+}
+
+
+@keyframes reactorGlow {
+    0%,
+    100% {
+        opacity: .7;
+        transform: scale(.96);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.04);
+    }
+}
+
+
+@keyframes speakingPulse {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.09);
+    }
+}
+
+
+@keyframes statusPulse {
+    0%,
+    100% {
+        opacity: .5;
+        transform: scale(.9);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.16);
+    }
+}
+
+
+@keyframes waveAnimation {
+    from {
+        height: 5px;
+        opacity: .3;
+    }
+
+    to {
+        height: 29px;
+        opacity: 1;
+    }
+}
+
+
+@keyframes textFlicker {
+    0%,
+    94%,
+    100% {
+        opacity: 1;
+    }
+
+    96% {
+        opacity: .65;
+    }
+
+    98% {
+        opacity: .9;
+    }
+}
+
+
+@keyframes memoryAppear {
+    from {
+        opacity: 0;
+        transform: translateX(-7px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+
+@keyframes chatAppear {
+    from {
+        opacity: 0;
+        transform: translateY(7px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+@keyframes hudSweep {
+    0% {
+        left: -70%;
+    }
+
+    100% {
+        left: 130%;
+    }
+}
+
+
+@keyframes gaugeShine {
+    0% {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+
+    30% {
+        opacity: .7;
+    }
+
+    100% {
+        transform: translateX(25px);
+        opacity: 0;
+    }
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1100px) {
+
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+
+    .core-panel {
+        min-height: 520px;
+    }
+
+
+    .side-panel {
+        max-height: none;
+        overflow: visible;
+    }
+
+
+    .command-panel {
+        grid-column: auto;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+
+    .app {
+        width: 94%;
+    }
+
+
+    .top-bar {
+        height: 62px;
+
+        padding: 0 12px;
+    }
+
+
+    .brand {
+        font-size: 16px;
+        letter-spacing: 3px;
+    }
+
+
+    .system-state {
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+
+
+    .dashboard {
+        padding: 12px 0;
+        gap: 12px;
+    }
+
+
+    .core-panel {
+        min-height: 450px;
+    }
+
+
+    .core {
+        width: 260px;
+        height: 260px;
+    }
+
+
+    .ring-one {
+        width: 235px;
+        height: 235px;
+    }
+
+
+    .ring-two {
+        width: 200px;
+        height: 200px;
+    }
+
+
+    .ring-three {
+        width: 160px;
+        height: 160px;
+    }
+
+
+    .core-scan {
+        width: 150px;
+        height: 150px;
+    }
+
+
+    .core-center {
+        width: 105px;
+        height: 105px;
+    }
+
+
+    .core-center span {
+        font-size: 38px;
+    }
+
+
+    .core-panel h1 {
+        font-size: 27px;
+        letter-spacing: 6px;
+    }
+
+
+    .command-panel {
+        padding: 12px;
+    }
+
+
+    .command-input-area {
+        grid-template-columns: 1fr 1fr;
+    }
+
+
+    .command-input-area input {
+        grid-column: 1 / -1;
+    }
+
+
+    .memory-input-area {
+        grid-template-columns: 1fr;
+    }
+
+
+    .chat-input-area {
+        grid-template-columns: 1fr;
+    }
+
+
+    .chat-messages {
+        height: 280px;
+    }
+
+
+    .bottom-bar {
+        font-size: 6px;
+        padding: 0 10px;
+    }
+}
+
+
+/* =========================================================
+   PERFORMANCE / ACCESSIBILITY
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+
+        animation-iteration-count: 1 !important;
+
+        scroll-behavior: auto !important;
+
+        transition-duration: .01ms !important;
+    }
+}
+/* =========================================================
+   ULTRON NEURAL UI LAYER V4
+   Additive visual enhancement — original CSS preserved
+========================================================= */
+
+:root {
+    --ultron-neural-glow: rgba(255, 45, 45, 0.22);
+    --ultron-neural-line: rgba(255, 70, 70, 0.16);
+    --ultron-neural-panel: rgba(10, 8, 8, 0.72);
+}
+
+/* --- GLOBAL ATMOSPHERE --- */
+
+body {
+    background:
+        radial-gradient(
+            circle at 50% 18%,
+            rgba(255, 45, 45, 0.07),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 85% 80%,
+            rgba(255, 120, 0, 0.035),
+            transparent 28%
+        ),
+        #050505;
+}
+
+body::before {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+body::after {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+/* --- APP DEPTH --- */
+
+.app {
+    position: relative;
+    isolation: isolate;
+}
+
+.app::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 50, 50, 0.025) 50%,
+            transparent 100%
+        );
+
+    animation: ultronAmbientShift 8s ease-in-out infinite;
+}
+
+/* --- TOP HUD --- */
+
+.top-bar {
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(15, 10, 10, 0.86),
+            rgba(8, 7, 7, 0.68)
+        );
+
+    box-shadow:
+        0 1px 0 var(--ultron-neural-line),
+        0 12px 40px rgba(0, 0, 0, 0.28);
+}
+
+.brand {
+    letter-spacing: 0.22em;
+    text-shadow:
+        0 0 8px rgba(255, 60, 60, 0.4),
+        0 0 22px rgba(255, 30, 30, 0.18);
+}
+
+.brand-dot {
+    box-shadow:
+        0 0 8px rgba(255, 50, 50, 0.8),
+        0 0 22px rgba(255, 30, 30, 0.35);
+}
+
+/* --- SYSTEM STATE --- */
+
+.system-state {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    background: rgba(255, 255, 255, 0.015);
+    border: 1px solid rgba(255, 255, 255, 0.035);
+    border-radius: 999px;
+
+    padding: 7px 12px;
+}
+
+/* --- DASHBOARD PANELS --- */
+
+.core-panel,
+.side-panel,
+.command-panel {
+    position: relative;
+}
+
+.panel-card,
+.memory-save-panel,
+.command-history,
+.ai-chat-panel {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18, 12, 12, 0.78),
+            rgba(7, 7, 7, 0.72)
+        );
+
+    border-color: rgba(255, 70, 70, 0.11);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.025),
+        0 12px 35px rgba(0, 0, 0, 0.22);
+}
+
+.panel-card:hover,
+.memory-save-panel:hover,
+.command-history:hover,
+.ai-chat-panel:hover {
+    border-color: rgba(255, 70, 70, 0.22);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035),
+        0 16px 42px rgba(0, 0, 0, 0.30),
+        0 0 24px rgba(255, 35, 35, 0.035);
+}
+
+/* --- CORE ENHANCEMENT --- */
+
+.core {
+    filter:
+        drop-shadow(0 0 12px rgba(255, 35, 35, 0.22))
+        drop-shadow(0 0 38px rgba(255, 35, 35, 0.08));
+}
+
+.core-center {
+    box-shadow:
+        0 0 20px rgba(255, 35, 35, 0.32),
+        0 0 55px rgba(255, 35, 35, 0.12),
+        inset 0 0 24px rgba(255, 35, 35, 0.08);
+}
+
+.core-center span {
+    text-shadow:
+        0 0 10px rgba(255, 70, 70, 0.85),
+        0 0 30px rgba(255, 30, 30, 0.42);
+}
+
+/* --- INPUTS --- */
+
+input {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.025),
+            rgba(255, 255, 255, 0.012)
+        );
+
+    border-color: rgba(255, 70, 70, 0.10);
+
+    transition:
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        background 180ms ease,
+        transform 180ms ease;
+}
+
+input:focus {
+    border-color: rgba(255, 65, 65, 0.42);
+
+    box-shadow:
+        0 0 0 3px rgba(255, 40, 40, 0.055),
+        0 0 24px rgba(255, 30, 30, 0.09);
+}
+
+/* --- BUTTONS --- */
+
+button {
+    transition:
+        transform 160ms ease,
+        box-shadow 160ms ease,
+        border-color 160ms ease,
+        background 160ms ease;
+}
+
+button:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 0 18px rgba(255, 40, 40, 0.10);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* --- COMMAND TERMINAL --- */
+
+#commandOutput {
+    position: relative;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.018),
+            rgba(0, 0, 0, 0.18)
+        );
+
+    border-color: rgba(255, 70, 70, 0.09);
+
+    box-shadow:
+        inset 0 0 30px rgba(255, 25, 25, 0.018);
+}
+
+/* --- CHAT --- */
+
+.chat-messages {
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(255, 40, 40, 0.025),
+            transparent 55%
+        );
+}
+
+.chat-message {
+    border-color: rgba(255, 70, 70, 0.07);
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.ai-message {
+    box-shadow:
+        inset 2px 0 0 rgba(255, 60, 60, 0.30),
+        0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* --- FOOTER --- */
+
+.bottom-bar {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    border-top-color: rgba(255, 60, 60, 0.08);
+}
+
+/* --- SCANLINE --- */
+
+.app::after {
+    content: "";
+
+    position: fixed;
+    inset: 0;
+
+    pointer-events: none;
+    z-index: 9999;
+
+    background:
+        repeating-linear-gradient(
+            180deg,
+            transparent 0,
+            transparent 3px,
+            rgba(255, 255, 255, 0.008) 4px
+        );
+
+    opacity: 0.22;
+}
+
+/* --- AMBIENT ANIMATION --- */
+
+@keyframes ultronAmbientShift {
+    0%,
+    100% {
+        opacity: 0.45;
+        transform: translateX(-1%);
+    }
+
+    50% {
+        opacity: 0.75;
+        transform: translateX(1%);
+    }
+}
+
+/* --- ACCESSIBILITY --- */
+
+@media (prefers-reduced-motion: reduce) {
+    .app::before {
+        animation: none;
+    }
+
+    button,
+    input {
+        transition: none;
+    }
+}
+
+/* =========================================================
+   END ULTRON NEURAL UI LAYER V4
+========================================================= */
+
+
+/* =========================================================
+   ULTRON ADVANCED DIVYANSH BRANDING
+========================================================= */
+
+.divyansh-branding {
+    position: relative;
+    z-index: 20;
+    width: 100%;
+    text-align: center;
+    margin: 10px 0 4px;
+    padding: 8px 20px 12px;
+    pointer-events: none;
+}
+
+.divyansh-name {
+    font-family: "Orbitron", "Segoe UI", sans-serif;
+    font-size: clamp(16px, 1.8vw, 24px);
+    font-weight: 800;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #ffffff;
+    text-shadow:
+        0 0 8px rgba(0, 180, 255, 0.8),
+        0 0 22px rgba(0, 100, 255, 0.45);
+}
+
+.divyansh-role {
+    margin-top: 6px;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    color: rgba(150, 210, 255, 0.72);
+    text-transform: uppercase;
+}
+
+.divyansh-role span {
+    display: inline-block;
+    margin: 0 7px;
+    color: rgba(0, 190, 255, 0.9);
+    text-shadow: 0 0 8px rgba(0, 190, 255, 0.8);
+}
+
+.divyansh-branding::after {
+    content: "";
+    display: block;
+    width: min(420px, 65%);
+    height: 1px;
+    margin: 10px auto 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 190, 255, 0.8),
+        rgba(130, 70, 255, 0.8),
+        transparent
+    );
+    box-shadow:
+        0 0 8px rgba(0, 180, 255, 0.55),
+        0 0 18px rgba(100, 70, 255, 0.3);
+}
+
+@media (max-width: 700px) {
+
+    .divyansh-branding {
+        margin-top: 6px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .divyansh-name {
+        letter-spacing: 0.16em;
+    }
+
+    .divyansh-role {
+        font-size: 7px;
+        letter-spacing: 0.12em;
+        line-height: 1.8;
+    }
+
+    .divyansh-role span {
+        margin: 0 3px;
+    }
+}
+
+/* =========================================================
+   END ADVANCED DIVYANSH BRANDING
+========================================================= */
+
+
+
+
+/* =========================================================
+   ULTRON ADVANCED CSS V5
+   HUD / CORE / TERMINAL VISUAL UPGRADE
+========================================================= */
+
+:root {
+    --v5-cyan: #00c8ff;
+    --v5-blue: #1677ff;
+    --v5-violet: #7b4dff;
+    --v5-border: rgba(0, 190, 255, 0.20);
+    --v5-border-bright: rgba(0, 200, 255, 0.42);
+    --v5-glass: rgba(5, 12, 24, 0.72);
+}
+
+/* ---------- GLOBAL HUD DEPTH ---------- */
+
+.app {
+    position: relative;
+    isolation: isolate;
+}
+
+.top-bar,
+.panel-card,
+.command-panel,
+.ai-chat-panel,
+.memory-save-panel,
+.command-history {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+/* ---------- TOP HUD ---------- */
+
+.top-bar {
+    position: relative;
+    overflow: hidden;
+    border-bottom-color: var(--v5-border-bright);
+}
+
+.top-bar::before {
+    opacity: 0.75;
+}
+
+.top-bar::after {
+    opacity: 0.5;
+}
+
+/* ---------- CORE UPGRADE ---------- */
+
+.core-panel {
+    position: relative;
+    overflow: hidden;
+}
+
+.core-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(0, 200, 255, 0.035) 50%,
+            transparent 100%
+        );
+    animation: v5CoreSweep 6s linear infinite;
+}
+
+.core {
+    filter:
+        drop-shadow(0 0 18px rgba(0, 180, 255, 0.18))
+        drop-shadow(0 0 42px rgba(80, 60, 255, 0.08));
+}
+
+.core-ring {
+    will-change: transform;
+}
+
+.core-center {
+    box-shadow:
+        0 0 18px rgba(0, 190, 255, 0.30),
+        0 0 45px rgba(0, 120, 255, 0.12),
+        inset 0 0 24px rgba(0, 190, 255, 0.10);
+}
+
+/* ---------- SIDE HUD CARDS ---------- */
+
+.panel-card {
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(10, 20, 38, 0.78),
+            var(--v5-glass)
+        );
+    border-color: var(--v5-border);
+    transition:
+        border-color 220ms ease,
+        transform 220ms ease,
+        box-shadow 220ms ease;
+}
+
+.panel-card:hover {
+    border-color: var(--v5-border-bright);
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 28px rgba(0, 0, 0, 0.28),
+        0 0 24px rgba(0, 150, 255, 0.07);
+}
+
+/* ---------- PANEL SCAN LINE ---------- */
+
+.panel-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -1px;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 200, 255, 0.42),
+        transparent
+    );
+    opacity: 0;
+    transform: translateX(-100%);
+}
+
+.panel-card:hover::after {
+    opacity: 1;
+    animation: v5PanelScan 1.5s ease-out;
+}
+
+/* ---------- VALUES ---------- */
+
+.panel-value {
+    text-shadow:
+        0 0 10px rgba(0, 190, 255, 0.18);
+}
+
+/* ---------- GAUGES ---------- */
+
+.gauge-track {
+    position: relative;
+    overflow: hidden;
+}
+
+.gauge-fill {
+    box-shadow:
+        0 0 8px rgba(0, 190, 255, 0.38),
+        0 0 18px rgba(0, 130, 255, 0.15);
+    transition: width 500ms cubic-bezier(.22, 1, .36, 1);
+}
+
+/* ---------- COMMAND TERMINAL ---------- */
+
+.command-panel {
+    position: relative;
+    overflow: hidden;
+    border-color: var(--v5-border);
+    box-shadow:
+        0 0 30px rgba(0, 120, 255, 0.045),
+        inset 0 0 40px rgba(0, 100, 255, 0.018);
+}
+
+.command-input-area input,
+.chat-input-area input {
+    transition:
+        border-color 200ms ease,
+        box-shadow 200ms ease,
+        background 200ms ease;
+}
+
+.command-input-area input:focus,
+.chat-input-area input:focus {
+    border-color: var(--v5-border-bright);
+    box-shadow:
+        0 0 0 2px rgba(0, 170, 255, 0.05),
+        0 0 22px rgba(0, 160, 255, 0.08);
+}
+
+/* ---------- BUTTON FEEDBACK ---------- */
+
+button {
+    position: relative;
+    overflow: hidden;
+}
+
+button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        110deg,
+        transparent 25%,
+        rgba(255, 255, 255, 0.07) 50%,
+        transparent 75%
+    );
+    transform: translateX(-120%);
+}
+
+button:hover::after {
+    transform: translateX(120%);
+    transition: transform 550ms ease;
+}
+
+/* ---------- AI CHAT ---------- */
+
+.ai-chat-panel {
+    position: relative;
+    overflow: hidden;
+    border-color: var(--v5-border);
+    box-shadow:
+        inset 0 0 35px rgba(0, 130, 255, 0.025);
+}
+
+.chat-messages {
+    scroll-behavior: smooth;
+}
+
+.chat-message {
+    transition:
+        transform 180ms ease,
+        border-color 180ms ease;
+}
+
+.chat-message:hover {
+    transform: translateX(2px);
+}
+
+/* ---------- MEMORY ---------- */
+
+.memory-entry {
+    transition:
+        background 180ms ease,
+        border-color 180ms ease,
+        transform 180ms ease;
+}
+
+.memory-entry:hover {
+    transform: translateX(3px);
+}
+
+/* ---------- FOOTER ---------- */
+
+.bottom-bar {
+    position: relative;
+    border-top-color: var(--v5-border);
+}
+
+.bottom-bar span {
+    opacity: 0.78;
+}
+
+/* ---------- ANIMATIONS ---------- */
+
+@keyframes v5CoreSweep {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes v5PanelScan {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* ---------- REDUCED MOTION ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .core-panel::after,
+    .panel-card::after {
+        animation: none;
+    }
+
+    .panel-card,
+    .chat-message,
+    .memory-entry,
+    .gauge-fill {
+        transition: none;
+    }
+}
+
+/* =========================================================
+   END ULTRON ADVANCED CSS V5
+========================================================= */
+
+
+/* V5 FIX — remove unwanted core-panel overlay */
+.core-panel::after {
+    display: none !important;
+}
+
+
+
+/* =========================================================
+   ULTRON ADVANCED CSS V6
+   PREMIUM HUD / REACTOR / CONSOLE LAYER
+========================================================= */
+
+/* ---------- PREMIUM PANEL DEPTH ---------- */
+
+.panel-card,
+.command-panel,
+.ai-chat-panel,
+.memory-save-panel,
+.command-history {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(7, 15, 29, 0.86),
+            rgba(3, 9, 19, 0.78)
+        );
+    border: 1px solid rgba(0, 190, 255, 0.16);
+}
+
+/* ---------- HUD CORNER ACCENTS ---------- */
+
+.panel-card::before,
+.command-panel::before,
+.ai-chat-panel::before {
+    pointer-events: none;
+}
+
+/* ---------- CORE REACTOR ---------- */
+
+.core {
+    position: relative;
+    transform: translateZ(0);
+}
+
+.core::before {
+    box-shadow:
+        0 0 25px rgba(0, 190, 255, 0.08),
+        0 0 65px rgba(80, 70, 255, 0.06);
+}
+
+.core-center {
+    position: relative;
+    z-index: 5;
+    border: 1px solid rgba(0, 200, 255, 0.24);
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(0, 190, 255, 0.12),
+            rgba(4, 10, 20, 0.92) 68%
+        );
+}
+
+/* ---------- REACTOR ENERGY RINGS ---------- */
+
+.ring-one,
+.ring-two,
+.ring-three {
+    will-change: transform;
+}
+
+.ring-one {
+    filter: drop-shadow(0 0 5px rgba(0, 190, 255, 0.20));
+}
+
+.ring-two {
+    filter: drop-shadow(0 0 7px rgba(70, 110, 255, 0.18));
+}
+
+.ring-three {
+    filter: drop-shadow(0 0 5px rgba(130, 70, 255, 0.16));
+}
+
+/* ---------- STATUS TEXT ---------- */
+
+.core-status-line {
+    z-index: 10;
+    text-transform: uppercase;
+}
+
+.core-status-line span:last-child {
+    letter-spacing: 2px;
+}
+
+/* ---------- SYSTEM VALUES ---------- */
+
+.system-stat strong {
+    transition:
+        text-shadow 200ms ease,
+        opacity 200ms ease;
+}
+
+.system-stat:hover strong {
+    text-shadow: 0 0 12px rgba(0, 190, 255, 0.24);
+}
+
+/* ---------- GAUGE HUD ---------- */
+
+.gauge-track {
+    border: 1px solid rgba(0, 180, 255, 0.10);
+    background: rgba(0, 0, 0, 0.30);
+}
+
+.gauge-fill {
+    position: relative;
+    overflow: hidden;
+}
+
+.gauge-fill::after {
+    opacity: 0.55;
+}
+
+/* ---------- TERMINAL ---------- */
+
+#commandOutput {
+    position: relative;
+    border-left: 2px solid rgba(0, 190, 255, 0.24);
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0, 150, 255, 0.035),
+            transparent 45%
+        );
+}
+
+#commandOutput::before {
+    content: "OUTPUT";
+    position: absolute;
+    top: 7px;
+    right: 10px;
+    font-family: var(--display);
+    font-size: 7px;
+    letter-spacing: 2px;
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+/* ---------- COMMAND HISTORY ---------- */
+
+.history-entry {
+    border-left: 1px solid rgba(0, 190, 255, 0.12);
+    transition:
+        border-color 180ms ease,
+        background 180ms ease,
+        transform 180ms ease;
+}
+
+.history-entry:hover {
+    border-left-color: rgba(0, 190, 255, 0.40);
+    background: rgba(0, 140, 255, 0.025);
+    transform: translateX(2px);
+}
+
+/* ---------- CHAT ---------- */
+
+.ai-chat-panel {
+    box-shadow:
+        inset 0 0 45px rgba(0, 130, 255, 0.018),
+        0 10px 35px rgba(0, 0, 0, 0.18);
+}
+
+.chat-header {
+    border-bottom-color: rgba(0, 190, 255, 0.12);
+}
+
+.chat-core-status {
+    opacity: 0.72;
+}
+
+/* ---------- INPUT HUD ---------- */
+
+input {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(5, 13, 25, 0.82),
+            rgba(2, 7, 15, 0.88)
+        );
+}
+
+input:focus {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(6, 17, 32, 0.92),
+            rgba(2, 9, 18, 0.94)
+        );
+}
+
+/* ---------- BUTTONS ---------- */
+
+button {
+    transition:
+        transform 160ms ease,
+        border-color 160ms ease,
+        box-shadow 160ms ease,
+        background 160ms ease;
+}
+
+button:hover {
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* ---------- FOOTER ---------- */
+
+.bottom-bar {
+    background: rgba(2, 7, 14, 0.52);
+}
+
+.bottom-bar span {
+    transition: opacity 180ms ease;
+}
+
+.bottom-bar span:hover {
+    opacity: 1;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 900px) {
+
+    .panel-card,
+    .command-panel,
+    .ai-chat-panel {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+}
+
+@media (max-width: 600px) {
+
+    .core-status-line {
+        left: 18px;
+        right: 18px;
+    }
+
+    #commandOutput::before {
+        display: none;
+    }
+}
+
+/* ---------- REDUCED MOTION ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+    button,
+    .history-entry,
+    .system-stat strong,
+    .bottom-bar span {
+        transition: none;
+    }
+}
+
+/* =========================================================
+   END ULTRON ADVANCED CSS V6
+========================================================= */
+
+
+/* =========================================================
+   ULTRON RESEARCH SOURCES
+   Futuristic Source Cards
+========================================================= */
+
+.chat-sources {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 95, 31, 0.35);
+    border-left: 3px solid #ff5f1f;
+    border-radius: 10px;
+    background: rgba(255, 95, 31, 0.045);
+    box-shadow:
+        0 0 18px rgba(255, 95, 31, 0.08),
+        inset 0 0 20px rgba(255, 95, 31, 0.025);
+}
+
+.chat-sources-title {
+    margin-bottom: 9px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #ff7a2f;
+    text-transform: uppercase;
+}
+
+.chat-sources ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.chat-sources li {
+    margin: 6px 0;
+}
+
+.chat-sources a {
+    display: block;
+    padding: 8px 10px;
+    border: 1px solid rgba(255, 95, 31, 0.16);
+    border-radius: 7px;
+    color: #d8d8d8;
+    background: rgba(0, 0, 0, 0.18);
+    font-size: 12px;
+    text-decoration: none;
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.chat-sources a:hover {
+    border-color: rgba(255, 95, 31, 0.55);
+    background: rgba(255, 95, 31, 0.08);
+    box-shadow: 0 0 12px rgba(255, 95, 31, 0.12);
+    transform: translateX(3px);
+}
+
+
+
+/* =========================================================
+   ULTRON AUTO VOICE
+========================================================= */
+
+#autoVoiceButton.active {
+    box-shadow:
+        0 0 8px rgba(255, 35, 10, .85),
+        0 0 24px rgba(255, 100, 0, .35);
+    border-color: var(--orange);
+    color: var(--white);
+}

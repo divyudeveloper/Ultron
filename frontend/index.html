@@ -1,0 +1,678 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ULTRON AI</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+
+        <!-- TOP HUD -->
+        <header class="top-bar">
+
+            <div class="brand">
+                <span class="brand-dot"></span>
+                <span>ULTRON</span>
+            </div>
+
+            <div class="system-state">
+                <span id="indicator"></span>
+
+                <span id="connectionText">
+                    CONNECTING
+                </span>
+            </div>
+
+        </header>
+
+
+        <!-- MAIN DASHBOARD -->
+        <main class="dashboard">
+
+            <!-- =====================================================
+                 LEFT / CENTER CORE
+            ====================================================== -->
+
+            <section class="core-panel">
+
+                <div class="core-status-line">
+                    <span>AI CORE</span>
+                    <span>ONLINE</span>
+                </div>
+
+                <div class="core">
+
+                    <div class="core-ring ring-one"></div>
+                    <div class="core-ring ring-two"></div>
+                    <div class="core-ring ring-three"></div>
+
+                    <div class="core-scan"></div>
+
+                    <div class="core-center">
+                        <span>U</span>
+                    </div>
+
+                </div>
+
+                <h1>ULTRON</h1>
+
+                <p id="status">
+                    SYSTEM INITIALIZING...
+                </p>
+
+                <div class="wave">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 RIGHT SYSTEM HUD
+            ====================================================== -->
+
+            <aside class="side-panel">
+
+
+                <!-- =================================================
+                     SYSTEM MONITOR
+                ================================================== -->
+
+                <div class="panel-card system-monitor-card">
+
+                    <div class="panel-title">
+                        <span>SYSTEM MONITOR</span>
+                        <span>01</span>
+                    </div>
+
+                    <div
+                        class="panel-value"
+                        id="systemStatus"
+                    >
+                        OFFLINE
+                    </div>
+
+
+                    <!-- BASIC SYSTEM INFO -->
+
+                    <div class="system-monitor-grid">
+
+                        <div class="system-stat">
+                            <span>CPU</span>
+
+                            <strong id="cpuModel">
+                                DETECTING...
+                            </strong>
+                        </div>
+
+
+                        <div class="system-stat">
+                            <span>CORES</span>
+
+                            <strong id="cpuCores">
+                                --
+                            </strong>
+                        </div>
+
+
+                        <div class="system-stat">
+                            <span>RAM</span>
+
+                            <strong id="ramUsage">
+                                --
+                            </strong>
+                        </div>
+
+
+                        <div class="system-stat">
+                            <span>OS</span>
+
+                            <strong id="osInfo">
+                                --
+                            </strong>
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         CPU GAUGE
+                    ================================================== -->
+
+                    <div class="monitor-gauge">
+
+                        <div class="gauge-label">
+
+                            <span>
+                                CPU LOAD
+                            </span>
+
+                            <span id="cpuUsageValue">
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="gauge-track">
+
+                            <div
+                                id="cpuUsageBar"
+                                class="gauge-fill"
+                                style="width: 0%;"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         RAM GAUGE
+                    ================================================== -->
+
+                    <div class="monitor-gauge">
+
+                        <div class="gauge-label">
+
+                            <span>
+                                RAM LOAD
+                            </span>
+
+                            <span id="ramUsageValue">
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="gauge-track">
+
+                            <div
+                                id="ramUsageBar"
+                                class="gauge-fill"
+                                style="width: 0%;"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         BATTERY INFO
+                    ================================================== -->
+
+                    <div class="system-stat">
+
+                        <span>
+                            BATTERY
+                        </span>
+
+                        <strong id="batteryStatus">
+                            --
+                        </strong>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         UPTIME
+                    ================================================== -->
+
+                    <div class="system-stat">
+
+                        <span>
+                            UPTIME
+                        </span>
+
+                        <strong id="systemUptime">
+                            --
+                        </strong>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         BATTERY GAUGE
+                    ================================================== -->
+
+                    <div class="monitor-gauge">
+
+                        <div class="gauge-label">
+
+                            <span>
+                                BATTERY LEVEL
+                            </span>
+
+                            <span id="batteryUsageValue">
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="gauge-track">
+
+                            <div
+                                id="batteryUsageBar"
+                                class="gauge-fill"
+                                style="width: 0%;"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel-line"></div>
+
+                </div>
+                <!-- NETWORK -->
+<div class="panel-card network-card">
+
+    <div class="panel-title">
+        <span>NETWORK</span>
+        <span>05</span>
+    </div>
+
+    <div class="panel-value" id="networkStatus">
+        OFFLINE
+    </div>
+
+    <div class="system-stat">
+        <span>INTERFACE</span>
+        <strong id="networkInterface">
+            --
+        </strong>
+    </div>
+
+    <div class="system-stat">
+        <span>ADAPTERS</span>
+        <strong id="networkAdapters">
+            0
+        </strong>
+    </div>
+
+    <div class="panel-line"></div>
+
+</div>
+
+
+                <!-- =================================================
+                     AI CORE
+                ================================================== -->
+
+                <div class="panel-card">
+
+                    <div class="panel-title">
+
+                        <span>
+                            AI CORE
+                        </span>
+
+                        <span>
+                            02
+                        </span>
+
+                    </div>
+
+                    <div
+                        class="panel-value"
+                        id="aiStatus"
+                    >
+                        OFFLINE
+                    </div>
+
+                    <div class="panel-line"></div>
+
+                </div>
+
+
+                <!-- =================================================
+                     MEMORY
+                ================================================== -->
+
+                <div class="panel-card">
+
+                    <div class="panel-title">
+
+                        <span>
+                            MEMORY
+                        </span>
+
+                        <span>
+                            03
+                        </span>
+
+                    </div>
+
+                    <div
+                        class="panel-value"
+                        id="memoryCount"
+                    >
+                        0
+                    </div>
+
+                    <div class="panel-line"></div>
+
+                </div>
+
+
+                <!-- =================================================
+                     MEMORY LOG
+                ================================================== -->
+
+                <div class="panel-card memory-panel">
+
+                    <div class="panel-title">
+
+                        <span>
+                            MEMORY LOG
+                        </span>
+
+                        <span>
+                            04
+                        </span>
+
+                    </div>
+
+                    <div id="memoryList">
+                        No memories loaded.
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     SAVE MEMORY
+                ================================================== -->
+
+                <div class="memory-save-panel">
+
+                    <div class="history-title">
+                        SAVE MEMORY
+                    </div>
+
+
+                    <div class="memory-input-area">
+
+                        <input
+                            type="text"
+                            id="memoryType"
+                            placeholder="TYPE"
+                        >
+
+                        <input
+                            type="text"
+                            id="memoryContent"
+                            placeholder="ENTER MEMORY..."
+                        >
+
+                        <button
+                            type="button"
+                            id="saveMemoryButton"
+                        >
+                            SAVE
+                        </button>
+
+                    </div>
+
+
+                    <div id="memorySaveStatus"></div>
+
+
+                    <div class="memory-clear-panel">
+
+                        <button
+                            type="button"
+                            id="clearMemoryButton"
+                        >
+                            CLEAR ALL MEMORY
+                        </button>
+
+                        <div id="memoryClearStatus"></div>
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+
+            <!-- =====================================================
+                 COMMAND / AI SECTION
+            ====================================================== -->
+
+            <section class="command-panel">
+
+
+                <!-- COMMAND HEADER -->
+
+                <div class="command-header">
+
+                    <div>
+
+                        <span>
+                            COMMAND TERMINAL
+                        </span>
+
+                        <span class="command-subtitle">
+                            ULTRON://CORE
+                        </span>
+
+                    </div>
+
+                    <div class="terminal-status">
+                        READY
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     COMMAND INPUT
+                ================================================== -->
+
+                <div class="command-input-area">
+
+                    <input
+                        type="text"
+                        id="commandInput"
+                        placeholder="ENTER ULTRON COMMAND..."
+                        autocomplete="off"
+                    >
+
+                    <button
+                        type="button"
+                        id="commandButton"
+                    >
+                        EXECUTE
+                    </button>
+
+                    <button
+                        type="button"
+                        id="voiceButton"
+                    >
+                        VOICE
+                    </button>
+
+                    <button
+                        type="button"
+                        id="stopVoiceButton"
+                    >
+                        STOP
+                    </button>
+
+                </div>
+
+
+                <!-- COMMAND OUTPUT -->
+
+                <div id="commandOutput">
+                    Awaiting command...
+                </div>
+
+
+                <!-- =================================================
+                     COMMAND HISTORY
+                ================================================== -->
+
+                <div class="command-history">
+
+                    <div class="history-header">
+
+                        <div class="history-title">
+                            COMMAND HISTORY
+                        </div>
+
+                        <button
+                            type="button"
+                            id="clearHistoryButton"
+                        >
+                            CLEAR
+                        </button>
+
+                    </div>
+
+
+                    <div id="historyList">
+                        No commands yet.
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     AI CHAT
+                ================================================== -->
+
+                <section class="ai-chat-panel">
+
+                    <div class="chat-header">
+
+                        <div>
+
+                            <span>
+                                ULTRON AI
+                            </span>
+
+                            <span class="chat-subtitle">
+                                LOCAL INTELLIGENCE
+                            </span>
+
+                        </div>
+
+                        <span class="chat-core-status">
+                            AI://CORE
+                        </span>
+
+                    </div>
+
+
+                    <!-- CHAT MESSAGES -->
+
+                    <div
+                        id="chatMessages"
+                        class="chat-messages"
+                    >
+
+                        <div class="chat-message system-message">
+
+                            <div class="chat-sender">
+                                SYSTEM
+                            </div>
+
+                            <div class="chat-text">
+                                ULTRON AI ready.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CHAT INPUT -->
+
+                    <div class="chat-input-area">
+
+                        <input
+                            type="text"
+                            id="chatInput"
+                            placeholder="ASK ULTRON ANYTHING..."
+                            autocomplete="off"
+                        >
+
+                        <button
+                            type="button"
+                            id="chatButton"
+                        >
+                            SEND
+                        </button>
+
+                    </div>
+
+
+                    <div id="chatStatus">
+                        ULTRON READY
+                    </div>
+
+                </section>
+
+            </section>
+
+        </main>
+
+
+        <!-- =====================================================
+             FOOTER
+        ====================================================== -->
+
+                <footer class="bottom-bar">
+
+            <span>ULTRON CORE</span>
+
+            <span>V1.0.0</span>
+
+            <span>LOCAL AI NETWORK</span>
+
+            <span>BUILT BY DIVYANSH KANDE</span>
+
+        </footer>
+
+    </div>
+
+
+    <!-- =========================================================
+         JAVASCRIPT
+    ========================================================== -->
+
+    <script src="js/api.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/voice.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
