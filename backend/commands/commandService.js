@@ -1,4 +1,4 @@
-﻿const systemAgent = require("../agents/systemAgent");
+const systemAgent = require("../agents/systemAgent");
 const agentRegistry = require("../agents/agentRegistry");
 const planner = require("../agents/planner");
 const orchestrator = require("../agents/orchestrator");
@@ -22,6 +22,13 @@ const {
     verifyProcessRunning,
     executeAndVerifyApp
 } = require("../agents/desktopAgent");
+
+const {
+    SKILLS,
+    workspaceInfo,
+    listWorkspace,
+    diagnostics
+} = require("../services/advancedService");
 
 
 
@@ -180,7 +187,7 @@ function getSearchQuery(text) {
 
     return normalized
         .replace(
-            /^(?:search web|search for|google search|google|search)\s*/i,
+            /^(?:web search|web search karo|web par search|internet search|search web|search for|google search|google|search)\s*/i,
             ""
         )
         .trim();
@@ -218,31 +225,31 @@ if (/^(?:press enter|enter)$/i.test(text)) {
     return "keyboard_enter";
 }
 
-if (/^(?:select all|select everything)$/i.test(text)) {
+if (/^(?:select all|select everything|ctrl\s+a|control\s+a)$/i.test(text)) {
         return "keyboard_ctrl_a";
     }
 
-    if (/^(?:copy|copy this)$/i.test(text)) {
+    if (/^(?:copy|copy this|ctrl\s+c|control\s+c)$/i.test(text)) {
         return "keyboard_ctrl_c";
     }
 
-    if (/^(?:paste|paste this)$/i.test(text)) {
+    if (/^(?:paste|paste this|ctrl\s+v|control\s+v)$/i.test(text)) {
         return "keyboard_ctrl_v";
     }
 
-    if (/^(?:cut|cut this)$/i.test(text)) {
+    if (/^(?:cut|cut this|ctrl\s+x|control\s+x)$/i.test(text)) {
         return "keyboard_ctrl_x";
     }
 
-    if (/^(?:save|save this)$/i.test(text)) {
+    if (/^(?:save|save this|ctrl\s+s|control\s+s)$/i.test(text)) {
         return "keyboard_ctrl_s";
     }
 
-    if (/^(?:undo|undo that)$/i.test(text)) {
+    if (/^(?:undo|undo that|ctrl\s+z|control\s+z)$/i.test(text)) {
         return "keyboard_ctrl_z";
     }
 
-    if (/^(?:redo|redo that)$/i.test(text)) {
+    if (/^(?:redo|redo that|ctrl\s+y|control\s+y)$/i.test(text)) {
         return "keyboard_ctrl_y";
     }
 /* =====================================================
@@ -276,6 +283,9 @@ if (/^(?:select all|select everything)$/i.test(text)) {
 
     if (
         /^(?:system|laptop|pc|computer)\s+(?:status|health|check)/i.test(text) ||
+        /^(?:system|laptop|pc|computer)\s+(?:ka|ki)\s+(?:status|health)\s+(?:bata|batao|dikhao)/i.test(text) ||
+        /^(?:system|laptop|pc|computer)\s+(?:check|health)\s+(?:karo|batao|bata)/i.test(text) ||
+        /^(?:system|laptop|pc|computer)\s+ka\s+status\s+(?:bata|batao)/i.test(text) ||
         /^(?:system|laptop|pc|computer)\s+kaisa\s+hai/i.test(text) ||
         /^mera\s+laptop\s+kaisa\s+hai/i.test(text) ||
         /^(?:status|health)\s+(?:batao|dikhao)/i.test(text)
@@ -301,9 +311,11 @@ if (/^(?:select all|select everything)$/i.test(text)) {
     ===================================================== */
 
     if (
-        /^battery\b/i.test(text) &&
+        (/^(?:battery\b|meri\s+battery\b)/i.test(text)) &&
         (
             text.includes("kitni") ||
+            text.includes("bata") ||
+            text.includes("dikhao") ||
             text.includes("status") ||
             text.includes("check") ||
             text.includes("percentage")
@@ -407,13 +419,40 @@ if (/^(?:select all|select everything)$/i.test(text)) {
     }
 
 
+    /* =====================================================
+       ARITHMETIC CALCULATOR
+    ===================================================== */
+
+    if (/^(?:calculate|calc)\s+[-+*/%().0-9\s]+$/i.test(text)) {
+        return "calculate";
+    }
+
+
     if (
-        /^(?:open|launch|start|run)\s+(?:notepad|note\s+pad|calculator|calc|chrome|vscode|vs\s*code|visual\s+studio\s+code)\s+(?:and|then)\s+type\s+.+/i.test(text)
+        /^(?:open|launch|start|run)\s+(?:notepad|note\s+pad|calculator|calc|chrome|vscode|vs\s*code|visual\s+studio\s+code)\s+(?:and|then)\s+type\s+.+/i.test(text) ||
+        /^(?:open|launch|start|run)\s+(?:notepad|note\s+pad|calculator|calc|chrome|vscode|vs\s*code|visual\s+studio\s+code|youtube)\s+(?:and|then)\s+(?:open|launch|start|run)?\s*(?:notepad|note\s+pad|calculator|calc|chrome|vscode|vs\s*code|visual\s+studio\s+code|youtube)$/i.test(text)
     ) {
         return "desktop_multi_action";
     }
     if (/^type\s+.+/i.test(rawText.trim())) {
         return "type_text";
+    }
+
+
+    /* =====================================================
+       ADVANCED CAPABILITIES
+    ===================================================== */
+
+    if (/^(?:advanced\s+)?(?:diagnostics?|self\s+diagnostics?)(?:\s+(?:check|status|run|dikhao|batao|bata|karo))?$/i.test(text)) {
+        return "advanced_diagnostics";
+    }
+
+    if (/^(?:advanced\s+)?skills?(?:\s+(?:check|status|dikhao|batao|bata|show))?$/i.test(text)) {
+        return "advanced_skills";
+    }
+
+    if (/^(?:advanced\s+)?workspace(?:\s+(?:check|status|dikhao|batao|bata|show|list))?$/i.test(text)) {
+        return "advanced_workspace";
     }
 
 
@@ -466,7 +505,8 @@ if (/^(?:select all|select everything)$/i.test(text)) {
         matchesOpenCommand(
             rawText,
             "youtube"
-        )
+        ) ||
+        /^(?:youtube)\s+(?:chalao|kholo|khol|open\s+karo)$/i.test(text)
     ) {
         return "open_youtube";
     }
@@ -562,6 +602,10 @@ if (/^(?:select all|select everything)$/i.test(text)) {
     ===================================================== */
 
     if (
+        text.startsWith("web search ") ||
+        text.startsWith("web search karo ") ||
+        text.startsWith("web par search ") ||
+        text.startsWith("internet search ") ||
         text.startsWith("search web ") ||
         text.startsWith("search for ") ||
         text.startsWith("google search ") ||
@@ -940,6 +984,83 @@ async function getUptimeStatusResponse() {
             minutes +
             " minutes."
     };
+}
+
+
+/* =========================================================
+   SAFE ARITHMETIC CALCULATOR
+========================================================= */
+
+function evaluateArithmeticExpression(expression) {
+    const source = String(expression || "").trim();
+    if (!source || source.length > 200) {
+        throw new Error("Expression is empty or too long.");
+    }
+
+    const tokens = source.match(/(?:\d+(?:\.\d+)?|\.\d+|[()+\-*/%])/g);
+    if (!tokens || tokens.join("") !== source.replace(/\s+/g, "")) {
+        throw new Error("Only numbers and + - * / % ( ) are allowed.");
+    }
+
+    let index = 0;
+    function parseExpression() {
+        let value = parseTerm();
+        while (tokens[index] === "+" || tokens[index] === "-") {
+            const op = tokens[index++];
+            const right = parseTerm();
+            value = op === "+" ? value + right : value - right;
+        }
+        return value;
+    }
+    function parseTerm() {
+        let value = parseFactor();
+        while (["*", "/", "%"].includes(tokens[index])) {
+            const op = tokens[index++];
+            const right = parseFactor();
+            if ((op === "/" || op === "%") && right === 0) {
+                throw new Error("Division by zero is not allowed.");
+            }
+            if (op === "*") value *= right;
+            else if (op === "/") value /= right;
+            else value %= right;
+        }
+        return value;
+    }
+    function parseFactor() {
+        if (tokens[index] === "+" || tokens[index] === "-") {
+            const sign = tokens[index++] === "-" ? -1 : 1;
+            return sign * parseFactor();
+        }
+        if (tokens[index] === "(") {
+            index++;
+            const value = parseExpression();
+            if (tokens[index++] !== ")") throw new Error("Mismatched parentheses.");
+            return value;
+        }
+        const token = tokens[index++];
+        const value = Number(token);
+        if (!Number.isFinite(value)) throw new Error("Invalid number.");
+        return value;
+    }
+
+    const result = parseExpression();
+    if (index !== tokens.length || !Number.isFinite(result)) {
+        throw new Error("Invalid arithmetic expression.");
+    }
+    return result;
+}
+
+function calculateResponse(command) {
+    const match = String(command || "").trim().match(/^(?:calculate|calc)\s+(.+)$/i);
+    if (!match) {
+        return { status: "error", intent: "calculate", message: "Example: calculate 25 * 4" };
+    }
+    try {
+        const result = evaluateArithmeticExpression(match[1]);
+        return { status: "success", intent: "calculate", expression: match[1].trim(), result, message: `Result: ${result}` };
+    } catch (error) {
+        return { status: "error", intent: "calculate", message: error.message };
+    }
 }
 
 
@@ -1741,56 +1862,101 @@ async function executeCommandInternal(command) {
 
 
         /* =================================================
+           CALCULATOR
+        ================================================= */
+
+        case "calculate":
+
+            return calculateResponse(normalizedCommand);
+
+
+        /* =================================================
+           ADVANCED
+        ================================================= */
+
+        case "advanced_skills":
+
+            return {
+                status: "success",
+                intent: "advanced_skills",
+                skills: SKILLS,
+                message: "ULTRON skills ready hain."
+            };
+
+        case "advanced_workspace":
+
+            return {
+                status: "success",
+                intent: "advanced_workspace",
+                workspace: workspaceInfo(),
+                entries: listWorkspace(""),
+                message: "ULTRON workspace ready hai."
+            };
+
+        case "advanced_diagnostics":
+
+            return {
+                ...(await diagnostics()),
+                intent: "advanced_diagnostics",
+                message: "ULTRON diagnostics complete."
+            };
+
+
+        /* =================================================
            DESKTOP
         ================================================= */
 
         case "desktop_multi_action": {
-
-            const match = normalizedCommand.match(
+            const typeMatch = normalizedCommand.match(
                 /^(?:open|launch|start|run)\s+(.+?)\s+(?:and|then)\s+type\s+(.+)$/i
             );
 
-            if (!match) {
-                return {
-                    status: "error",
-                    intent: "desktop_multi_action",
-                    message: "Multi-action command samajh nahi aaya."
-                };
-            }
-
-            const target = match[1].trim().toLowerCase();
-            const textToType = match[2].trim();
-
-            let openAction = null;
-
-            if (/^(?:notepad|note\s+pad)$/.test(target)) {
-                openAction = "notepad";
-            } else if (/^(?:calculator|calc)$/.test(target)) {
-                openAction = "calculator";
-            } else if (/^chrome$/.test(target)) {
-                openAction = "chrome";
-            } else if (/^(?:vscode|vs\s*code|visual\s+studio\s+code)$/.test(target)) {
-                openAction = "vscode";
-            }
-
-            if (!openAction) {
-                return {
-                    status: "error",
-                    intent: "desktop_multi_action",
-                    message: "Ye desktop app multi-action ke liye supported nahi hai."
-                };
-            }
-
-            await executeDesktopAction(openAction);
-
-            await new Promise(resolve =>
-                setTimeout(resolve, 1500)
+            const openTwoMatch = normalizedCommand.match(
+                /^(?:open|launch|start|run)\s+(.+?)\s+(?:and|then)\s+(?:(?:open|launch|start|run)\s+)?(.+)$/i
             );
 
-            return await executeDesktopAction(
-                "type",
-                textToType
-            );
+            const appName = (name) => {
+                const value = String(name || "").trim().toLowerCase();
+                if (/^(?:notepad|note\s+pad)$/.test(value)) return "notepad";
+                if (/^(?:calculator|calc)$/.test(value)) return "calculator";
+                if (/^chrome$/.test(value)) return "chrome";
+                if (/^(?:vscode|vs\s*code|visual\s+studio\s+code)$/.test(value)) return "vscode";
+                if (/^youtube$/.test(value)) return "youtube";
+                return null;
+            };
+
+            if (openTwoMatch) {
+                const first = appName(openTwoMatch[1]);
+                const second = appName(openTwoMatch[2]);
+                if (!first || !second) {
+                    return { status: "error", intent: "desktop_multi_action", message: "Unsupported multi-action app." };
+                }
+                const results = [];
+                for (const action of [first, second]) {
+                    if (action === "youtube") results.push(await openYouTube());
+                    else results.push(await executeDesktopAction(action));
+                }
+                const failed = results.find(r => !r || r.success === false || r.status === "error");
+                return failed
+                    ? { status: "error", intent: "desktop_multi_action", message: failed.message || "Multi-action failed." }
+                    : { status: "success", intent: "desktop_multi_action", message: "Apps exact order mein open kar diye." };
+            }
+
+            if (typeMatch) {
+                const target = appName(typeMatch[1]);
+                const textToType = typeMatch[2].trim();
+                if (!target || target === "youtube") {
+                    return { status: "error", intent: "desktop_multi_action", message: "Ye app type-action ke liye supported nahi hai." };
+                }
+                const opened = await executeDesktopAction(target);
+                if (!opened || opened.success === false) {
+                    return { status: "error", intent: "desktop_multi_action", message: opened?.message || "Desktop app open nahi hua." };
+                }
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return await executeDesktopAction("type", textToType);
+            }
+
+            return { status: "error", intent: "desktop_multi_action", message: "Multi-action command samajh nahi aaya." };
         }
 
         case "keyboard_tab":

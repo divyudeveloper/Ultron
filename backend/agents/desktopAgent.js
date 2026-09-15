@@ -1,27 +1,14 @@
 ﻿const { exec, spawn } = require("child_process");
 
 function openApp(app) {
-    const trustedApps = {
-        "calc.exe": {
-            executable: "calc.exe",
-            args: []
-        },
-        "notepad.exe": {
-            executable: "notepad.exe",
-            args: []
-        },
-        "chrome.exe": {
-            executable: "chrome.exe",
-            args: []
-        },
-        "code": {
-            executable: "code.cmd",
-            args: []
-        }
+    const commands = {
+        "calc.exe": ["calc.exe", []],
+        "notepad.exe": ["notepad.exe", []],
+        "chrome.exe": ["cmd.exe", ["/c", "start", "", "chrome"]],
+        "code": ["cmd.exe", ["/c", "start", "", "code"]]
     };
 
-    const target = trustedApps[app];
-
+    const target = commands[app];
     if (!target) {
         return Promise.resolve({
             success: false,
@@ -30,30 +17,39 @@ function openApp(app) {
     }
 
     return new Promise((resolve) => {
-        const child = spawn(target.executable, target.args, {
-            shell: false,
-            detached: true,
-            stdio: "ignore",
-            windowsHide: true
-        });
+        let settled = false;
+        const finish = (result) => {
+            if (!settled) {
+                settled = true;
+                resolve(result);
+            }
+        };
 
-        child.once("error", (error) => {
+        try {
+            const child = spawn(target[0], target[1], {
+                shell: false,
+                detached: true,
+                stdio: "ignore",
+                windowsHide: true
+            });
+
+            child.once("error", (error) => {
+                console.error(`[ULTRON] ${app} launch error:`, error);
+                finish({ success: false, message: `${app} could not be launched.` });
+            });
+
+            child.once("spawn", () => {
+                child.unref();
+                finish({ success: true, message: `${app} launched successfully` });
+            });
+
+            setTimeout(() => {
+                finish({ success: false, message: `${app} launch timed out.` });
+            }, 5000).unref();
+        } catch (error) {
             console.error(`[ULTRON] ${app} launch error:`, error);
-
-            resolve({
-                success: false,
-                message: `${app} could not be launched.`
-            });
-        });
-
-        child.once("spawn", () => {
-            child.unref();
-
-            resolve({
-                success: true,
-                message: `${app} launched successfully`
-            });
-        });
+            finish({ success: false, message: `${app} could not be launched.` });
+        }
     });
 }
 
@@ -98,10 +94,18 @@ public static class NativeInput
         public KEYBDINPUT ki;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    // Win64 INPUT layout:
+    // DWORD type at offset 0
+    // 4-byte alignment padding
+    // 32-byte union at offset 8
+    // Total size = 40 bytes
+    [StructLayout(LayoutKind.Explicit, Size = 40)]
     private struct INPUT
     {
+        [FieldOffset(0)]
         public uint type;
+
+        [FieldOffset(8)]
         public INPUTUNION U;
     }
 
@@ -128,13 +132,22 @@ public static class NativeInput
 
         ShowWindow(hWnd, SW_RESTORE);
 
-        if (!SetForegroundWindow(hWnd))
-            return "FOREGROUND_FAILED";
+        // Windows can reject SetForegroundWindow when another process owns
+        // the foreground lock. Try the native call first, then fall back to
+        // WScript.Shell AppActivate from PowerShell before giving up.
+        bool foregroundRequested = SetForegroundWindow(hWnd);
 
-        System.Threading.Thread.Sleep(500);
+        System.Threading.Thread.Sleep(250);
+
+        // The caller already activates the Notepad process before this
+        // native call. Avoid referencing PowerShell variables from C#.
+        if (GetForegroundWindow() != hWnd)
+        {
+            System.Threading.Thread.Sleep(500);
+        }
 
         if (GetForegroundWindow() != hWnd)
-            return "WRONG_FOREGROUND";
+            return foregroundRequested ? "WRONG_FOREGROUND" : "FOREGROUND_FAILED";
 
         var inputs = new INPUT[text.Length * 2];
 
@@ -179,48 +192,62 @@ public static class NativeInput
             index++;
         }
 
+        int inputSize = Marshal.SizeOf(typeof(INPUT));
+
         uint sent = SendInput(
             (uint)inputs.Length,
             inputs,
-            Marshal.SizeOf(typeof(INPUT))
+            inputSize
         );
 
         if (sent != inputs.Length)
-            return "SENDINPUT_FAILED:" + sent + "/" + inputs.Length;
+        {
+            int errorCode = Marshal.GetLastWin32Error();
 
-        return "TYPE_SUCCESS";
+            return "SENDINPUT_FAILED:" +
+                   sent + "/" +
+                   inputs.Length +
+                   ":SIZE=" +
+                   inputSize +
+                   ":ERROR=" +
+                   errorCode;
+        }
+
+        return "TYPE_SUCCESS:SIZE=" + inputSize + ":SENT=" + sent;
     }
 }
 "@
 
-$p = Get-Process notepad -ErrorAction SilentlyContinue |
-     Where-Object { $_.MainWindowHandle -ne 0 } |
-     Select-Object -First 1
+# Always launch a fresh Notepad instance so the HWND belongs
+# to the exact process we are going to activate and type into.
+$p = Start-Process notepad.exe -PassThru
 
-if (-not $p) {
-    $p = Start-Process notepad.exe -PassThru
+$timeout = 0
 
-    $timeout = 0
+while ($timeout -lt 80) {
+    Start-Sleep -Milliseconds 100
 
-    while ($timeout -lt 50) {
-        Start-Sleep -Milliseconds 100
+    try {
+        $p.Refresh()
+    } catch {}
 
-        try {
-            $p.Refresh()
-        } catch {}
-
-        if ($p.MainWindowHandle -ne 0) {
-            break
-        }
-
-        $timeout++
+    if ($p.MainWindowHandle -ne 0) {
+        break
     }
+
+    $timeout++
 }
 
 if (-not $p -or $p.MainWindowHandle -eq 0) {
     Write-Output "NO_NOTEPAD_WINDOW"
     exit
 }
+
+try {
+    $shell = New-Object -ComObject WScript.Shell
+    $shell.AppActivate($p.Id) | Out-Null
+    Start-Sleep -Milliseconds 250
+} catch {}
 
 $result = [NativeInput]::TypeUnicode(
     $p.MainWindowHandle,
@@ -243,6 +270,7 @@ require("fs").writeFileSync(
 
 exec(
     `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${tempFile}"`,
+            { timeout: 10000, windowsHide: true },
             (error, stdout, stderr) => {
                 const output = String(stdout || "").trim();
 
@@ -407,7 +435,7 @@ async function executeDesktopAction(action, value = "") {
             return openApp("notepad.exe");
 
         case "chrome":
-            return openApp("start chrome");
+            return openApp("chrome.exe");
 
         case "vscode":
             return openApp("code");
@@ -453,62 +481,84 @@ async function executeAndVerifyApp(
     successMessage,
     failureMessage
 ) {
+    const launchMap = {
+        "start calc.exe": ["calc.exe", []],
+        "start notepad.exe": ["notepad.exe", []],
+        "start chrome": ["cmd.exe", ["/c", "start", "", "chrome"]],
+        "start code": ["cmd.exe", ["/c", "start", "", "code"]],
+        'start "" "https://www.youtube.com"': ["cmd.exe", ["/c", "start", "", "https://www.youtube.com"]]
+    };
+
+    const target = launchMap[String(shellCommand || "").trim().toLowerCase()];
+
+    if (!target) {
+        return {
+            status: "error",
+            intent,
+            success: false,
+            verification: "blocked",
+            message: failureMessage
+        };
+    }
+
     return new Promise((resolve) => {
-        if (
-            typeof shellCommand !== "string" ||
-            typeof processName !== "string" ||
-            !shellCommand.trim() ||
-            !processName.trim()
-        ) {
-            resolve({
-                success: false,
-                verification: "error",
-                message: failureMessage
+        let settled = false;
+        const finish = (result) => {
+            if (!settled) {
+                settled = true;
+                resolve(result);
+            }
+        };
+
+        try {
+            const child = spawn(target[0], target[1], {
+                shell: false,
+                detached: true,
+                stdio: "ignore",
+                windowsHide: true
             });
-            return;
-        }
 
-        exec(shellCommand, async (error) => {
-            if (error) {
-                console.error(
-                    `[ULTRON] ${appTitle} execution error:`,
-                    error
-                );
-
-                resolve({
+            child.once("error", (error) => {
+                console.error(`[ULTRON] ${appTitle} launch error:`, error);
+                finish({
+                    status: "error",
+                    intent,
                     success: false,
                     verification: "error",
                     message: failureMessage
                 });
-                return;
-            }
-
-            const checkIntervals = [500, 1000, 1500];
-
-            for (const ms of checkIntervals) {
-                await new Promise((resolveWait) =>
-                    setTimeout(resolveWait, ms)
-                );
-
-                const check = await verifyProcessRunning(processName);
-
-                if (check.verified) {
-                    resolve({
-                        success: true,
-                        verification: "verified",
-                        message: successMessage
-                    });
-                    return;
-                }
-            }
-
-            resolve({
-                success: true,
-                verification: "unknown",
-                message:
-                    `Command bhej diya hai, par ${appTitle} abhi dikh nahi raha.`
             });
-        });
+
+            child.once("spawn", () => {
+                child.unref();
+                finish({
+                    status: "success",
+                    intent,
+                    success: true,
+                    verification: "dispatched",
+                    message: successMessage
+                });
+            });
+
+            setTimeout(() => {
+                finish({
+                    status: "error",
+                    intent,
+                    success: false,
+                    verification: "timeout",
+                    message: `${appTitle} launch timed out.`
+                });
+            }, 5000).unref();
+        } catch (error) {
+            console.error(`[ULTRON] ${appTitle} launch error:`, error);
+            finish({
+                status: "error",
+                intent,
+                success: false,
+                verification: "error",
+                message: failureMessage
+            });
+        }
     });
 }
 /**
@@ -588,6 +638,14 @@ module.exports = {
     verifyProcessRunning,
     executeAndVerifyApp
 };
+
+
+
+
+
+
+
+
 
 
 

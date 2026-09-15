@@ -48,6 +48,16 @@ const registry = {
             "VS Code",
             "VS Code open kar diya.",
             "VS Code open nahi ho paaya. Check karo ki 'code' command PATH mein available hai."
+        ),
+
+    open_youtube: () =>
+        executeAndVerifyApp(
+            'start "" "https://www.youtube.com"',
+            "open_youtube",
+            "chrome.exe",
+            "YouTube",
+            "YouTube open kar diya.",
+            "YouTube open nahi ho paaya."
         )
 };
 
@@ -69,3 +79,4 @@ module.exports = {
     handleIntent,
     createPlan
 };
+

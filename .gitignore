@@ -39,5 +39,3 @@ llama-*.mjs
 **/*performance*
 **/*speed-optimized*
 **/*.txt
-
-.ultron.pid

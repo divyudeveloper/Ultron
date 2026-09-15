@@ -1,4 +1,4 @@
-﻿const dns = require("dns").promises;
+const dns = require("dns").promises;
 const net = require("net");
 
 const WEB_TIMEOUT_MS = positiveNumber(process.env.WEB_TIMEOUT_MS, 15_000);
@@ -1118,6 +1118,28 @@ function prepareWebSearchQuery(query) {
     return value;
 }
 
+function getOfficialTechnicalFallbackResults(query) {
+    const value = String(query || "").toLowerCase();
+    const seeds = [];
+
+    if (value.includes("node.js") || value.includes("nodejs") || value.includes("node lts")) {
+        seeds.push(
+            { title: "Node.js — Node.js Releases", url: "https://nodejs.org/en/about/previous-releases", snippet: "Official Node.js release and LTS information." },
+            { title: "Node.js — Download", url: "https://nodejs.org/en/download", snippet: "Official Node.js downloads and release information." }
+        );
+    } else if (value.includes("javascript")) {
+        seeds.push({ title: "JavaScript | MDN", url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript", snippet: "Official MDN JavaScript documentation." });
+    } else if (value.includes("react")) {
+        seeds.push({ title: "React", url: "https://react.dev/", snippet: "Official React documentation." });
+    } else if (value.includes("python")) {
+        seeds.push({ title: "Python.org", url: "https://www.python.org/", snippet: "Official Python website." });
+    } else if (value.includes("typescript")) {
+        seeds.push({ title: "TypeScript", url: "https://www.typescriptlang.org/", snippet: "Official TypeScript website." });
+    }
+
+    return seeds;
+}
+
 function filterRelevantSearchResults(results, query) {
     if (!Array.isArray(results) || results.length === 0) {
         return [];
@@ -1518,6 +1540,20 @@ async function searchWeb(query) {
             technicalQuery &&
             relevantResults.length === 0
         ) {
+            const officialFallback =
+                getOfficialTechnicalFallbackResults(searchQuery);
+
+            if (officialFallback.length) {
+                console.log(
+                    `[ULTRON WEB] Using official technical fallback: ${officialFallback.length} results`
+                );
+
+                return await enrichSearchResults(
+                    searchQuery,
+                    officialFallback
+                );
+            }
+
             return {
                 status: "success",
                 query: searchQuery,

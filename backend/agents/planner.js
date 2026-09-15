@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ULTRON Task Planner
  *
  * Phase 4 Step 1:
@@ -15,7 +15,8 @@ const SUPPORTED_INTENTS = new Set([
     "open_calculator",
     "open_notepad",
     "open_chrome",
-    "open_vscode"
+    "open_vscode",
+    "open_youtube"
 ]);
 
 const APP_PATTERNS = [
@@ -38,6 +39,11 @@ const APP_PATTERNS = [
         intent: "open_vscode",
         pattern: /\b(vscode|vs\s+code|visual\s+studio\s+code)\b/i,
         description: "Open VS Code"
+    },
+    {
+        intent: "open_youtube",
+        pattern: /\byoutube\b/i,
+        description: "Open YouTube"
     }
 ];
 
