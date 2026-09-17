@@ -1,4 +1,4 @@
-const systemAgent = require("../agents/systemAgent");
+﻿const systemAgent = require("../agents/systemAgent");
 const agentRegistry = require("../agents/agentRegistry");
 const planner = require("../agents/planner");
 const orchestrator = require("../agents/orchestrator");
@@ -14,6 +14,7 @@ const {
 const {
     summarizeWebResearch
 } = require("../services/researchService");
+
 
 const { exec, spawn } = require("child_process");
 
@@ -2135,16 +2136,14 @@ case "keyboard_ctrl_a":
 
         case "unknown":
 
-        default:
+        default: {
+            const { processAIMessage } =
+                require("../services/aiService");
 
-            return {
-                status: "unknown",
-                intent: "unknown",
-                command:
-                    normalizedCommand,
-                message:
-                    `Command samajh nahi aaya: "${normalizedCommand}". Help ke liye "help" bolo.`
-            };
+            return await processAIMessage(
+                normalizedCommand
+            );
+        }
     }
 }
 
@@ -2245,6 +2244,13 @@ module.exports = {
     executeCommand,
     detectIntent
 };
+
+
+
+
+
+
+
 
 
 

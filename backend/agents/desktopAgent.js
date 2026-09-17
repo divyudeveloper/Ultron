@@ -28,9 +28,9 @@ function openApp(app) {
         try {
             const child = spawn(target[0], target[1], {
                 shell: false,
-                detached: true,
+                detached: target[0] !== "powershell.exe",
                 stdio: "ignore",
-                windowsHide: true
+                windowsHide: target[0] !== "powershell.exe"
             });
 
             child.once("error", (error) => {
@@ -483,7 +483,7 @@ async function executeAndVerifyApp(
 ) {
     const launchMap = {
         "start calc.exe": ["calc.exe", []],
-        "start notepad.exe": ["notepad.exe", []],
+        "start notepad.exe": ["powershell.exe", ["-NoProfile", "-Command", "Start-Process -FilePath notepad.exe"]],
         "start chrome": ["cmd.exe", ["/c", "start", "", "chrome"]],
         "start code": ["cmd.exe", ["/c", "start", "", "code"]],
         'start "" "https://www.youtube.com"': ["cmd.exe", ["/c", "start", "", "https://www.youtube.com"]]
@@ -513,9 +513,9 @@ async function executeAndVerifyApp(
         try {
             const child = spawn(target[0], target[1], {
                 shell: false,
-                detached: true,
+                detached: target[0] !== "powershell.exe",
                 stdio: "ignore",
-                windowsHide: true
+                windowsHide: target[0] !== "powershell.exe"
             });
 
             child.once("error", (error) => {
@@ -529,13 +529,33 @@ async function executeAndVerifyApp(
                 });
             });
 
-            child.once("spawn", () => {
-                child.unref();
+            child.once("spawn", async () => {
+                if (target[0] === "powershell.exe") {
+                    await new Promise((r) => setTimeout(r, 1500));
+
+                    const verification = await verifyProcessRunning(processName);
+
+                    if (!verification.verified) {
+                        finish({
+                            status: "error",
+                            intent,
+                            success: false,
+                            verification: "not_running",
+                            message: failureMessage
+                        });
+                        return;
+                    }
+                }
+
+                child.unref?.();
+
                 finish({
                     status: "success",
                     intent,
                     success: true,
-                    verification: "dispatched",
+                    verification: target[0] === "powershell.exe"
+                        ? "verified"
+                        : "dispatched",
                     message: successMessage
                 });
             });
@@ -638,6 +658,8 @@ module.exports = {
     verifyProcessRunning,
     executeAndVerifyApp
 };
+
+
 
 
 

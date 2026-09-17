@@ -106,19 +106,53 @@ if (voiceState.supported) {
         try {
 
             if (
-                typeof sendAIMessage !==
+                typeof sendCommand !==
                 "function"
             ) {
                 throw new Error(
-                    "sendAIMessage is not available."
+                    "sendCommand is not available."
                 );
             }
 
 
-            const result =
-                await sendAIMessage(
+            console.log(
+                "ULTRON voice command routing:",
+                transcript
+            );
+
+
+            let result =
+                await sendCommand(
                     transcript
                 );
+
+
+            // Unknown command -> AI fallback
+            if (
+                result &&
+                result.status === "unknown"
+            ) {
+                if (typeof sendAIMessage !== "function") {
+                    throw new Error("sendAIMessage is not available.");
+                }
+
+                console.log(
+                    "ULTRON voice AI fallback:",
+                    transcript
+                );
+
+                const aiResult =
+                    await sendAIMessage(
+                        transcript
+                    );
+
+                if (
+                    aiResult &&
+                    aiResult.message
+                ) {
+                    result = aiResult;
+                }
+            }
 
 
             if (
@@ -533,6 +567,9 @@ function speakResponse(text) {
         utterance
     );
 }
+
+
+
 
 
 

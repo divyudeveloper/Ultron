@@ -206,11 +206,14 @@ async function askOllama(messages, options = {}) {
                     model: OLLAMA_MODEL,
                     messages,
                     stream: false,
+                    think: false,
                     options: {
                         temperature:
                             options.temperature ?? 0.2,
                         top_p:
                             options.top_p ?? 0.85,
+                        repeat_penalty:
+                            options.repeat_penalty ?? 1.15,
                         num_predict:
                             options.num_predict ?? 220
                     },
@@ -232,6 +235,8 @@ async function askOllama(messages, options = {}) {
         }
 
         const data = await response.json();
+
+        console.log("[ULTRON][OLLAMA RAW]", JSON.stringify(data));
 
         const answer =
             safeString(
@@ -2970,13 +2975,20 @@ async function processAIMessage(message) {
     ===================================================== */
 
     try {
+        const isStoryRequest =
+            /story|kahani|suna/i.test(userMessage);
+
         const memoryContext =
-            safeMemoryContext(
-                userMessage
-            );
+            isStoryRequest
+                ? ""
+                : safeMemoryContext(
+                    userMessage
+                );
 
         const conversationContext =
-            safeConversationContext();
+            isStoryRequest
+                ? ""
+                : safeConversationContext();
 
         const providerResult =
             await getProviderResponse(
@@ -3017,12 +3029,26 @@ Do not treat it as a memory unless the user explicitly stated the fact.`
                     {
                         role: "user",
                         content:
-                            userMessage
+                            isStoryRequest
+                                ? `Write a complete short story in Roman Hinglish. Start immediately. Use one main character, one simple problem, one clear solution, and a complete ending. Keep every event logical and connected. Use natural everyday Hindi written using English letters. Keep sentences short and easy to understand. Do not use awkward or meaningless phrases. Do not repeat sentences. Do not stop until the story has a proper ending.`
+                                : userMessage
                     }
                 ],
                 {
-                    temperature: 0.2,
-                    num_predict: 180
+                    temperature:
+                        /story|kahani|suna/i.test(userMessage)
+                            ? 0.7
+                            : 0.2,
+                    repeat_penalty:
+                        /story|kahani|suna/i.test(userMessage)
+                            ? 1.15
+                            : 1.05,
+                    num_predict:
+                        /story|kahani|suna|samjha|explain|explanation|detail|details|describe/i.test(
+                            userMessage
+                        )
+                            ? 320
+                            : 320
                 }
             );
 
@@ -3078,6 +3104,20 @@ module.exports = {
     getAIStatus,
     processAIMessage
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
