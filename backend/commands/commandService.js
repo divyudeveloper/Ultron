@@ -710,6 +710,18 @@ function saveMemoryResponse(command) {
             match[1]
         );
 
+    if (saved.status === "updated") {
+        return {
+            status: "success",
+            intent: "memory_save",
+            source: "memory",
+            message:
+                "Done bro. Maine purani preference update karke ye yaad rakh liya: " +
+                saved.memory.content
+        };
+    }
+
+
     if (saved.status === "existing") {
         return {
             status: "success",
@@ -2244,6 +2256,7 @@ module.exports = {
     executeCommand,
     detectIntent
 };
+
 
 
 

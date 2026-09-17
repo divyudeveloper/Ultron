@@ -240,6 +240,29 @@ function memoryAlreadyExists(
    SAVE MEMORY
 ========================================================= */
 
+
+function getPreferenceKey(content) {
+    const text = normalizeMemoryText(content);
+
+    if (/favorite\s+(?:editor|ide)/i.test(text)) {
+        return "favorite_editor";
+    }
+
+    if (/favorite\s+(?:programming\s+)?language/i.test(text)) {
+        return "favorite_programming_language";
+    }
+
+    if (/favorite\s+(?:color|colour)/i.test(text)) {
+        return "favorite_color";
+    }
+
+    if (/(?:my|mera|user\s+ka)\s+name/i.test(text)) {
+        return "user_name";
+    }
+
+    return null;
+}
+
 function saveMemory(
     type,
     content
@@ -287,7 +310,39 @@ function saveMemory(
         new Date().toISOString();
 
 
-    const memory = {
+    
+    const preferenceKey =
+        getPreferenceKey(cleanContent);
+
+    if (preferenceKey) {
+        const existingIndex =
+            memories.findIndex(
+                memory =>
+                    getPreferenceKey(
+                        memory.content
+                    ) === preferenceKey
+            );
+
+        if (existingIndex !== -1) {
+            const existing =
+                memories[existingIndex];
+
+            existing.content =
+                cleanContent;
+
+            existing.updatedAt =
+                new Date().toISOString();
+
+            writeMemoryFile(memories);
+
+            return {
+                status: "updated",
+                memory: existing
+            };
+        }
+    }
+
+const memory = {
 
         id:
             Date.now(),
